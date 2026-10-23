@@ -1,0 +1,348 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}Lost & Found{% endblock %} · FindLoop
+    </title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <header class="topbar">
+        <div class="container nav">
+
+            <a class="brand" href="{% url 'home' %}">
+                ✦ <span>FindLoop</span>
+            </a>
+
+            
+            <nav class="navlinks">
+
+                {% if user.is_authenticated %}
+
+                    <a href="{% url 'feed' %}">
+                        Feed
+                    </a>
+
+                    <a href="{% url 'community_list' %}">
+                        Communities
+                    </a>
+
+                    <!-- Inbox with unread badge -->
+                    
+                    <a href="{% url 'inbox' %}">
+                        Inbox
+
+                        <span
+                            id="inbox-badge"
+                            class="count"
+                            {% if inbox_badge_count == 0 %}hidden{% endif %}
+                        >
+                            {{ inbox_badge_count|default:0 }}
+                        </span>
+                    </a>
+
+
+                    <span class="hello">
+                        {{ user.username }}
+                    </span>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="navlogout" type="submit">
+                            Log out
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    <a href="{% url 'login' %}">Log in</a>
+
+                    <a class="button small" href="{% url 'signup' %}">
+                        Sign up
+                    </a>
+
+                {% endif %}
+
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container main">
+
+        {% for message in messages %}
+
+            <div class="flash {{ message.tags }}">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        FindLoop · A community-based lost & found project
+    </footer>
+
+    <!-- Socket.IO Connection -->
+
+<!-- Socket.IO Connection -->
+{% if user.is_authenticated %}
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+<script>
+    // Initialize immediately, not inside DOMContentLoaded.
+    if (typeof io !== "undefined") {
+
+        window.liveSocket = io({
+            path: "/socket.io/",
+            transports: ["websocket", "polling"],
+            withCredentials: true,
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000
+        });
+        
+        async function refreshInboxBadge() {
+            try {
+                const response = await fetch(
+                    "{% url 'unread_summary' %}",
+                    {
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    }
+                );
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+
+                const badge = document.getElementById(
+                    "inbox-badge"
+                );
+
+                if (badge) {
+                    const count = data.inbox_badge_count;
+
+                    badge.textContent = count;
+                    badge.hidden = count === 0;
+                }
+
+            } catch (error) {
+                console.error(
+                    "Failed to update Inbox count:",
+                    error
+                );
+            }
+        }
+
+        window.refreshInboxBadge = refreshInboxBadge;
+
+        // Update after real-time events.
+        window.liveSocket.on(
+            "new_message",
+            refreshInboxBadge
+        );
+
+        window.liveSocket.on(
+            "contact_request_created",
+            refreshInboxBadge
+        );
+
+        window.liveSocket.on(
+            "contact_request_updated",
+            refreshInboxBadge
+        );
+
+        window.liveSocket.on(
+            "connect",
+            refreshInboxBadge
+        );
+
+        // Synchronize when returning to this browser tab.
+        document.addEventListener(
+            "visibilitychange",
+            function () {
+                if (!document.hidden) {
+                    refreshInboxBadge();
+                }
+            }
+        );
+
+
+        window.liveSocket.on("connect", function () {
+            console.log(
+                "Socket.IO connected:",
+                window.liveSocket.id
+            );
+        });
+
+        window.liveSocket.on("disconnect", function (reason) {
+            console.warn("Socket.IO disconnected:", reason);
+        });
+
+        window.liveSocket.on("connect_error", function (error) {
+            console.error(
+                "Socket.IO connection error:",
+                error.message
+            );
+        });
+
+        window.liveSocket.on("new_notification", function (data) {
+
+            const counter = document.getElementById(
+                "live-notification-count"
+            );
+
+            if (counter) {
+                const count = Number(data.unread_count || 0);
+
+                counter.textContent = count;
+                counter.hidden = count === 0;
+            }
+
+            const toast = document.createElement("div");
+            toast.className = "realtime-toast";
+            toast.textContent = data.message;
+            toast.setAttribute("role", "status");
+
+            document.body.appendChild(toast);
+
+            setTimeout(function () {
+                toast.remove();
+            }, 5000);
+        });
+
+    } else {
+        console.error("Socket.IO client library not loaded.");
+    }
+</script>
+
+<script>
+(function () {
+    const unreadUrl = "{% url 'unread_summary' %}";
+
+    let latestRequest = 0;
+
+    async function refreshInboxBadge() {
+        const requestNumber = ++latestRequest;
+
+        try {
+            const response = await fetch(unreadUrl, {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            // Ignore an older response arriving late.
+            if (requestNumber !== latestRequest) return;
+
+            const badge = document.getElementById(
+                "inbox-badge"
+            );
+
+            if (!badge) return;
+
+            const count = Number(
+                data.inbox_badge_count || 0
+            );
+
+            badge.textContent =
+                count > 99 ? "99+" : String(count);
+
+            badge.hidden = count === 0;
+
+            console.log(
+                "Navbar Inbox count updated:",
+                count
+            );
+
+        } catch (error) {
+            console.error(
+                "Inbox badge update failed:",
+                error
+            );
+        }
+    }
+
+    // Make it available to the chat page.
+    window.refreshInboxBadge = refreshInboxBadge;
+
+    const socket = window.liveSocket;
+
+    if (socket) {
+
+        // New incoming message
+        socket.on("new_message", refreshInboxBadge);
+
+        // New contact request
+        socket.on(
+            "contact_request_created",
+            refreshInboxBadge
+        );
+
+        // Request approved or rejected
+        socket.on(
+            "contact_request_updated",
+            refreshInboxBadge
+        );
+
+        // Reconnect: retrieve latest count
+        socket.on("connect", refreshInboxBadge);
+
+    }
+
+    // Messages marked as read in another component
+    window.addEventListener(
+        "findloop:messages-read",
+        refreshInboxBadge
+    );
+
+    // Returning to the website
+    document.addEventListener(
+        "visibilitychange",
+        function () {
+            if (!document.hidden) {
+                refreshInboxBadge();
+            }
+        }
+    );
+
+    window.addEventListener(
+        "focus",
+        refreshInboxBadge
+    );
+
+    // Correct any stale count on initial page load.
+    refreshInboxBadge();
+
+})();
+</script>
+
+
+{% endif %}
+
+
+</body>
+</html>

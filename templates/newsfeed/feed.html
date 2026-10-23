@@ -1,0 +1,298 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="social-feed-layout">
+
+    <!-- Feed Header -->
+    <div class="feed-heading">
+        <div>
+            <h1>Community Feed</h1>
+            <p>Lost and found updates from your communities</p>
+        </div>
+
+        <a href="{% url 'post_create' %}" class="button">
+            + Create Post
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <form method="get" class="feed-filters">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="Search lost and found items..."
+            value="{{ search_query }}"
+        >
+
+        <select name="type">
+            <option value="" {% if not selected_type %}selected{% endif %}>All Posts</option>
+            <option value="lost" {% if selected_type == 'lost' %}selected{% endif %}>Lost</option>
+            <option value="found" {% if selected_type == 'found' %}selected{% endif %}>Found</option>
+        </select>
+
+        <button type="submit" class="button">
+            Search
+        </button>
+
+    </form>
+
+    <!-- Vertical Scrolling Newsfeed -->
+    <div class="facebook-feed">
+
+        {% for post in posts %}
+
+        <article class="social-post" id="post-{{ post.id }}">
+
+            <!-- Author Information -->
+            <div class="social-post-header">
+
+                <div class="user-avatar">
+                    {{ post.user.username|first|upper }}
+                </div>
+
+                <div class="post-author">
+                    <strong>{{ post.user.username }}</strong>
+                    <span>
+                        {{ post.community.name }}
+                        · {{ post.created_at|timesince }} ago
+                    </span>
+                </div>
+
+                <span class="tag {{ post.type }}">
+                    {{ post.get_type_display }}
+                </span>
+
+            </div>
+
+            <!-- Caption and Description -->
+            <div class="social-caption">
+
+                <h3>{{ post.caption }}</h3>
+
+                <p>{{ post.description|linebreaksbr }}</p>
+
+                <div class="tagrow">
+                    <span class="tag">
+                        {{ post.get_status_display }}
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Item Image -->
+            {% if post.image %}
+                <img
+                    class="social-post-image"
+                    src="{{ post.image.url }}"
+                    alt="{{ post.caption }}"
+                    loading="lazy"
+                >
+            {% endif %}
+
+            <!-- Comments Toggle -->
+            <div class="comments-toggle-row">
+
+                <button
+                    type="button"
+                    class="comments-toggle-btn"
+                    aria-expanded="false"
+                    aria-controls="comments-{{ post.pk }}"
+                    onclick="toggleComments(this)"
+                >
+                    <span class="comment-icon">💬</span>
+                    Comments ({{ post.comments.count }})
+                </button>
+
+            </div>
+
+            <!-- Comments Hidden Initially -->
+            <div
+                class="social-comments"
+                id="comments-{{ post.pk }}"
+                hidden
+            >
+
+                {% for comment in post.comments.all %}
+
+                    <div class="social-comment">
+
+                        <div class="comment-avatar">
+                            {{ comment.user.username|first|upper }}
+                        </div>
+
+                        <div class="comment-bubble">
+
+                            <strong>
+                                {{ comment.user.username }}
+                            </strong>
+
+                            <p>
+                                {{ comment.content|linebreaksbr }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <p class="no-comments">
+                        No comments yet. Be the first to comment.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+            <!-- Comment Input and Message Button -->
+            <div class="social-action-row">
+
+                <form
+                    method="post"
+                    action="{% url 'post_comment' post.pk %}"
+                    class="social-comment-form"
+                >
+
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="from_feed"
+                        value="1"
+                    >
+
+                    <input
+                        type="text"
+                        name="content"
+                        maxlength="1000"
+                        placeholder="Write a comment..."
+                        aria-label="Write a comment"
+                        required
+                    >
+
+                    <button
+                        type="submit"
+                        class="comment-send-btn"
+                    >
+                        Send
+                    </button>
+
+                </form>
+
+                <!-- Message / Manage -->
+                {% if post.user_id != user.id %}
+
+                    {% if post.status == 'open' %}
+
+                        <a
+                            href="{% url 'contact_request' post.pk %}"
+                            class="social-message-btn"
+                        >
+                            Message
+                        </a>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <a
+                        href="{% url 'post_detail' post.pk %}"
+                        class="social-message-btn"
+                    >
+                        Manage
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Post Footer -->
+            <div class="social-post-footer">
+                <a href="{% url 'post_detail' post.pk %}">
+                    View post details
+                </a>
+            </div>
+
+        </article>
+
+        {% empty %}
+
+        <!-- Empty Feed -->
+        <div class="panel feed-empty">
+
+            <h3>No posts found</h3>
+
+            <p>
+                Join a community or create your first post.
+            </p>
+
+            <a
+                href="{% url 'community_list' %}"
+                class="button"
+            >
+                Explore Communities
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- JavaScript: Show / Hide Comments -->
+<script>
+    function toggleComments(button) {
+
+        const commentsId = button.getAttribute("aria-controls");
+        const commentsBox = document.getElementById(commentsId);
+
+        if (!commentsBox) {
+            return;
+        }
+
+        const isCurrentlyOpen =
+            button.getAttribute("aria-expanded") === "true";
+
+        // Hide comments if open, show if closed
+        commentsBox.hidden = isCurrentlyOpen;
+
+        // Update button state
+        button.setAttribute(
+            "aria-expanded",
+            String(!isCurrentlyOpen)
+        );
+    }
+
+    // Preserve the comment section after submitting a comment.
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const hash = window.location.hash;
+
+        if (!hash.startsWith("#post-")) {
+            return;
+        }
+
+        const post = document.getElementById(hash.substring(1));
+
+        if (!post) {
+            return;
+        }
+
+        const toggleButton = post.querySelector(".comments-toggle-btn");
+
+        if (
+            toggleButton &&
+            toggleButton.getAttribute("aria-expanded") === "false"
+        ) {
+            toggleComments(toggleButton);
+        }
+
+    });
+</script>
+
+{% endblock %}

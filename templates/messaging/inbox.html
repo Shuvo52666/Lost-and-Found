@@ -1,0 +1,1330 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+body:has(.fl-messenger) {
+    overflow: hidden;
+}
+
+body:has(.fl-messenger) .container.main {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+
+body:has(.fl-messenger) .footer {
+    display: none;
+}
+
+/* Main layout */
+.fl-messenger {
+    display: grid;
+    grid-template-columns: 62px 320px minmax(0, 1fr);
+    width: 100%;
+    height: calc(100dvh - var(--fl-top-offset, 78px));
+    min-height: 0;
+    overflow: hidden;
+    background: #f7f9f8;
+    border-top: 1px solid #e2e8f0;
+    box-sizing: border-box;
+}
+
+/* Icon rail */
+.fl-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 7px;
+    background: #edf5f1;
+    border-right: 1px solid #dbe5e0;
+    min-height: 0;
+}
+
+.fl-rail-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 11px;
+    background: transparent;
+    color: #526b5f;
+    cursor: pointer;
+}
+
+.fl-rail-button.active,
+.fl-rail-button:hover {
+    background: #d9ebe2;
+    color: #087f66;
+}
+
+.fl-rail-button svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.fl-rail-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    background: #087f66;
+    color: white;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Conversation sidebar */
+.fl-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+.fl-sidebar-heading {
+    flex-shrink: 0;
+    padding: 20px 16px 12px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.fl-search-wrap {
+    flex-shrink: 0;
+    padding: 0 12px 12px;
+}
+
+.fl-search {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #dce4e9;
+    border-radius: 10px;
+    background: #f8fafc;
+    outline: none;
+    font: inherit;
+}
+
+.fl-search:focus {
+    border-color: #087f66;
+}
+
+/* Independent scrolling */
+.fl-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.fl-list-panel[hidden],
+.fl-chat-item[hidden],
+.fl-activity-item[hidden] {
+    display: none !important;
+}
+
+.fl-chat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: inherit;
+    text-decoration: none;
+}
+
+.fl-chat-item:hover,
+.fl-chat-item.selected {
+    background: #e8f5ee;
+}
+
+.fl-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #d8ece2;
+    color: #087f66;
+    font-weight: 700;
+}
+
+.fl-chat-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.fl-chat-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.fl-chat-top strong {
+    font-size: 14px;
+    color: #0f172a;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.fl-chat-time {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.fl-chat-line,
+.fl-chat-sub {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+}
+
+.fl-chat-line {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.fl-chat-sub {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.fl-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 99px;
+    padding: 4px 7px;
+    background: #087f66;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.fl-badge[hidden] {
+    display: none !important;
+}
+
+/* Notifications and requests */
+.fl-activity-item {
+    padding: 14px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.fl-activity-item.unread {
+    background: #effbf4;
+}
+
+.fl-activity-item p {
+    margin: 0 0 7px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.fl-activity-item small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.fl-activity-link {
+    display: block;
+    margin-top: 8px;
+    color: #087f66;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.fl-empty {
+    padding: 25px;
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Right chat */
+.fl-chat-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #f7f9f8;
+}
+
+.fl-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 18px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.fl-chat-header-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.fl-chat-header-main strong {
+    display: block;
+    font-size: 15px;
+}
+
+.fl-chat-header-main small {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.fl-chat-header-link {
+    font-size: 12px;
+    color: #087f66;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.fl-chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 20px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.fl-bubble {
+    align-self: flex-start;
+    max-width: min(75%, 440px);
+    padding: 12px 15px;
+    background: white;
+    border-radius: 13px;
+    box-shadow: 0 1px 3px #00000009;
+    overflow-wrap: anywhere;
+}
+
+.fl-bubble.mine {
+    align-self: flex-end;
+    background: #dcf5e7;
+}
+
+.fl-bubble strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.fl-bubble p {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.fl-bubble small {
+    display: block;
+    color: #64748b;
+    margin-top: 7px;
+    font-size: 10px;
+    text-align: right;
+}
+
+/* Locked chat */
+.fl-locked {
+    flex-shrink: 0;
+    background: #fffbeb;
+    color: #92400e;
+    padding: 16px;
+    text-align: center;
+    border-top: 1px solid #fde68a;
+    font-size: 13px;
+}
+
+.fl-decision-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.fl-decision-form button {
+    padding: 10px 17px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.fl-approve {
+    background: #087f66;
+    color: white;
+}
+
+.fl-reject {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Message input */
+.fl-chat-footer {
+    flex-shrink: 0;
+    background: white;
+    padding: 13px 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.fl-send-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fl-send-form textarea {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    max-height: 120px;
+    resize: vertical;
+    border-radius: 24px;
+    border: 1px solid #cbd5e1;
+    box-sizing: border-box;
+    padding: 12px 15px;
+    font: inherit;
+}
+
+.fl-send-form textarea:focus {
+    outline: none;
+    border-color: #087f66;
+}
+
+.fl-send-button {
+    border: 0;
+    border-radius: 24px;
+    background: #087f66;
+    color: white;
+    padding: 13px 20px;
+    cursor: pointer;
+}
+
+.fl-send-button:disabled {
+    opacity: .6;
+}
+
+#fl-send-status {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.fl-mobile-back {
+    display: none;
+}
+
+/* Thin scrollbars */
+.fl-list,
+.fl-chat-history {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .fl-messenger {
+        grid-template-columns: 55px 270px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .fl-messenger {
+        grid-template-columns: 55px minmax(0, 1fr);
+    }
+
+    .fl-chat-pane {
+        display: none;
+    }
+
+    .fl-messenger.mobile-chat-open {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mobile-chat-open .fl-rail,
+    .mobile-chat-open .fl-sidebar {
+        display: none;
+    }
+
+    .mobile-chat-open .fl-chat-pane {
+        display: flex;
+    }
+
+    .fl-mobile-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font-size: 22px;
+    }
+}
+</style>
+
+<div class="fl-messenger" id="fl-messenger">
+
+    <!-- LEFT ICON MENU -->
+    <aside class="fl-rail">
+
+        <button
+            type="button"
+            class="fl-rail-button active"
+            data-tab="chats"
+            aria-label="Chats"
+            title="Chats"
+        >
+            <svg viewBox="0 0 24 24">
+                <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.2 0-2.35-.25-3.39-.7L3 21l1.84-5.33A8.46 8.46 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5Z"/>
+            </svg>
+            <span
+                id="fl-chats-count"
+                class="fl-rail-count"
+                {% if not unread_message_count %}hidden{% endif %}
+            >{{ unread_message_count|default:0 }}</span>
+        </button>
+
+        <button
+            type="button"
+            class="fl-rail-button"
+            data-tab="notifications"
+            aria-label="Notifications"
+            title="Notifications"
+        >
+            <svg viewBox="0 0 24 24">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                <path d="M10 21h4"/>
+            </svg>
+            <span
+                id="fl-notifications-count"
+                class="fl-rail-count"
+                {% if not unread_notification_count %}hidden{% endif %}
+            >{{ unread_notification_count|default:0 }}</span>
+        </button>
+
+        <button
+            type="button"
+            class="fl-rail-button"
+            data-tab="requests"
+            aria-label="Recent Requests"
+            title="Recent Requests"
+        >
+            <svg viewBox="0 0 24 24">
+                <path d="M8 6h13M8 12h13M8 18h13"/>
+                <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+            </svg>
+            <span
+                id="fl-requests-count"
+                class="fl-rail-count"
+                {% if not pending_request_count %}hidden{% endif %}
+            >{{ pending_request_count|default:0 }}</span>
+        </button>
+
+    </aside>
+
+    <!-- LEFT SCROLLABLE LIST -->
+    <aside class="fl-sidebar">
+
+        <div class="fl-sidebar-heading" id="fl-sidebar-heading">
+            Chats
+        </div>
+
+        <div class="fl-search-wrap">
+            <input
+                type="search"
+                id="fl-search"
+                class="fl-search"
+                placeholder="Search chats..."
+                aria-label="Search"
+            >
+        </div>
+
+        <div class="fl-list">
+
+            <!-- CHATS -->
+            <div class="fl-list-panel" data-panel="chats">
+
+                {% for c in conversations %}
+                    <a
+                        href="{% url 'inbox' %}?chat={{ c.pk }}"
+                        class="fl-chat-item {% if active_chat.pk == c.pk %}selected{% endif %}"
+                        data-conversation-id="{{ c.pk }}"
+                        data-search="{{ c.sender.username }} {{ c.receiver.username }} {{ c.post.caption }}"
+                    >
+                        <div class="fl-avatar">
+                            {% if c.sender_id == user.id %}
+                                {{ c.receiver.username|first|upper }}
+                            {% else %}
+                                {{ c.sender.username|first|upper }}
+                            {% endif %}
+                        </div>
+
+                        <div class="fl-chat-info">
+                            <div class="fl-chat-top">
+                                <strong>
+                                    {% if c.sender_id == user.id %}
+                                        {{ c.receiver.username }}
+                                    {% else %}
+                                        {{ c.sender.username }}
+                                    {% endif %}
+                                </strong>
+                                <span class="fl-chat-time">
+                                    {% if c.latest_at %}
+                                        {{ c.latest_at|date:'H:i' }}
+                                    {% else %}
+                                        {{ c.created_at|date:'H:i' }}
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="fl-chat-line">
+                                {{ c.post.caption }}
+                            </div>
+
+                            <div class="fl-chat-sub">
+                                {% if c.latest_text %}
+                                    {{ c.latest_text|truncatechars:45 }}
+                                {% elif c.status == 'pending' %}
+                                    Contact request pending
+                                {% else %}
+                                    {{ c.get_status_display }}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <span
+                            class="fl-badge"
+                            data-unread-count
+                            {% if not c.unread_count and not c.status == 'pending' %}hidden{% endif %}
+                        >
+                            {% if c.unread_count %}
+                                {{ c.unread_count }}
+                            {% elif c.status == 'pending' and c.receiver_id == user.id %}
+                                New
+                            {% endif %}
+                        </span>
+                    </a>
+
+                {% empty %}
+                    <div class="fl-empty">
+                        No conversations yet.
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- NOTIFICATIONS -->
+            <div class="fl-list-panel" data-panel="notifications" hidden>
+
+                {% for n in recent_notifications %}
+                    <div
+                        class="fl-activity-item {% if not n.is_read %}unread{% endif %}"
+                        data-search="{{ n.message }}"
+                    >
+                        <p>{{ n.message }}</p>
+                        <small>{{ n.created_at|date:'M d, H:i' }}</small>
+
+                        {% if n.post %}
+                            <a
+                                class="fl-activity-link"
+                                href="{% url 'post_detail' n.post.pk %}"
+                            >
+                                View related post →
+                            </a>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="fl-empty">
+                        No notifications yet.
+                    </div>
+                {% endfor %}
+
+                <div class="fl-activity-item">
+                    <form method="post" action="{% url 'notifications_mark_read' %}">
+                        {% csrf_token %}
+                        <button class="button small" type="submit">
+                            Mark all read
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- RECENT REQUESTS -->
+            <div class="fl-list-panel" data-panel="requests" hidden>
+
+                {% for r in recent_requests %}
+                    <div
+                        class="fl-activity-item"
+                        data-search="{{ r.sender.username }} {{ r.receiver.username }} {{ r.post.caption }}"
+                    >
+                        <p>
+                            <strong>{{ r.sender.username }}</strong>
+                            → {{ r.receiver.username }}
+                        </p>
+
+                        <p>{{ r.post.caption }}</p>
+
+                        <small>
+                            {{ r.get_status_display }}
+                            · {{ r.created_at|date:'M d, H:i' }}
+                        </small>
+
+                        <a
+                            class="fl-activity-link"
+                            href="{% url 'inbox' %}?chat={{ r.pk }}"
+                        >
+                            Open conversation →
+                        </a>
+
+                        <a
+                            class="fl-activity-link"
+                            href="{% url 'post_detail' r.post.pk %}"
+                        >
+                            View related post →
+                        </a>
+                    </div>
+                {% empty %}
+                    <div class="fl-empty">
+                        No contact requests yet.
+                    </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- ACTIVE CHAT -->
+    <section class="fl-chat-pane">
+
+        {% if active_chat %}
+
+            <div class="fl-chat-header">
+
+                <button
+                    type="button"
+                    class="fl-mobile-back"
+                    id="fl-back"
+                    aria-label="Back to chats"
+                >←</button>
+
+                <div class="fl-avatar">
+                    {% if active_chat.sender_id == user.id %}
+                        {{ active_chat.receiver.username|first|upper }}
+                    {% else %}
+                        {{ active_chat.sender.username|first|upper }}
+                    {% endif %}
+                </div>
+
+                <div class="fl-chat-header-main">
+                    <strong>
+                        {% if active_chat.sender_id == user.id %}
+                            {{ active_chat.receiver.username }}
+                        {% else %}
+                            {{ active_chat.sender.username }}
+                        {% endif %}
+                    </strong>
+
+                    <small>
+                        {{ active_chat.post.caption }}
+                        · {{ active_chat.get_status_display }}
+                    </small>
+                </div>
+
+                <a
+                    class="fl-chat-header-link"
+                    href="{% url 'post_detail' active_chat.post.pk %}"
+                >
+                    View Post
+                </a>
+            </div>
+
+            <!-- INDEPENDENT MESSAGE SCROLL -->
+            <div class="fl-chat-history" id="fl-chat-history">
+
+                <div class="fl-bubble {% if active_chat.sender_id == user.id %}mine{% endif %}">
+                    <strong>Initial Contact Request</strong>
+                    <p>{{ active_chat.answer }}</p>
+                    <small>{{ active_chat.created_at|date:'H:i' }}</small>
+                </div>
+
+                {% for m in chat_messages %}
+                    <div
+                        class="fl-bubble {% if m.sender_id == user.id %}mine{% endif %}"
+                        data-message-id="{{ m.pk }}"
+                    >
+                        <strong>{{ m.sender.username }}</strong>
+                        <p>{{ m.content }}</p>
+                        <small>{{ m.created_at|date:'H:i' }}</small>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            {% if active_chat.status == 'pending' %}
+
+                <div class="fl-locked">
+                    Messaging is locked until the post owner accepts.
+
+                    {% if is_owner %}
+                        <form
+                            class="fl-decision-form"
+                            id="fl-decision-form"
+                            method="post"
+                            action="{% url 'request_decide' active_chat.pk %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                name="decision"
+                                value="approved"
+                                class="fl-approve"
+                            >Accept</button>
+
+                            <button
+                                type="submit"
+                                name="decision"
+                                value="rejected"
+                                class="fl-reject"
+                            >Reject</button>
+                        </form>
+                    {% endif %}
+                </div>
+
+            {% elif active_chat.status == 'rejected' %}
+
+                <div class="fl-locked">
+                    This contact request was rejected.
+                </div>
+
+            {% elif active_chat.status == 'approved' %}
+
+                <div class="fl-chat-footer">
+                    <form
+                        id="fl-send-form"
+                        class="fl-send-form"
+                        method="post"
+                        action="{% url 'send_message' active_chat.pk %}"
+                    >
+                        {% csrf_token %}
+
+                        <textarea
+                            id="fl-message-input"
+                            name="content"
+                            rows="1"
+                            maxlength="3000"
+                            required
+                            placeholder="Type a message..."
+                        ></textarea>
+
+                        <button
+                            type="submit"
+                            id="fl-send-button"
+                            class="fl-send-button"
+                        >
+                            Send
+                        </button>
+                    </form>
+
+                    <small
+                        id="fl-send-status"
+                        aria-live="polite"
+                    ></small>
+                </div>
+
+            {% endif %}
+
+        {% else %}
+            <div class="fl-empty">
+                Select a conversation to start chatting.
+            </div>
+        {% endif %}
+
+    </section>
+</div>
+
+{% if active_chat %}
+    {{ active_chat.pk|json_script:"fl-active-id" }}
+{% else %}
+    <script id="fl-active-id" type="application/json">null</script>
+{% endif %}
+
+{{ user.pk|json_script:"fl-current-user" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+
+    const messenger = document.getElementById("fl-messenger");
+    const sidebarTitle = document.getElementById("fl-sidebar-heading");
+    const searchInput = document.getElementById("fl-search");
+    const tabButtons = document.querySelectorAll(".fl-rail-button[data-tab]");
+    const panels = document.querySelectorAll(".fl-list-panel");
+
+    const activeId = JSON.parse(
+        document.getElementById("fl-active-id").textContent
+    );
+
+    const currentUserId = JSON.parse(
+        document.getElementById("fl-current-user").textContent
+    );
+
+    const chatHistory = document.getElementById("fl-chat-history");
+    const form = document.getElementById("fl-send-form");
+    const input = document.getElementById("fl-message-input");
+    const sendButton = document.getElementById("fl-send-button");
+    const sendStatus = document.getElementById("fl-send-status");
+
+    const socket = window.liveSocket;
+
+    // Fit below the actual navbar.
+    function resizeMessenger() {
+        const header = document.querySelector(".topbar");
+        const offset = header
+            ? header.getBoundingClientRect().bottom
+            : 78;
+
+        messenger.style.setProperty(
+            "--fl-top-offset",
+            Math.max(0, offset) + "px"
+        );
+    }
+
+    resizeMessenger();
+    window.addEventListener("resize", resizeMessenger);
+
+    // Tab switching.
+    function switchTab(name) {
+        tabButtons.forEach(function (button) {
+            const selected = button.dataset.tab === name;
+            button.classList.toggle("active", selected);
+            button.setAttribute("aria-pressed", String(selected));
+        });
+
+        panels.forEach(function (panel) {
+            panel.hidden = panel.dataset.panel !== name;
+        });
+
+        const titles = {
+            chats: "Chats",
+            notifications: "Notifications",
+            requests: "Recent Requests"
+        };
+
+        sidebarTitle.textContent = titles[name] || "Chats";
+        searchInput.value = "";
+        searchInput.placeholder = "Search " +
+            sidebarTitle.textContent.toLowerCase() + "...";
+
+        sessionStorage.setItem("fl-active-tab", name);
+        filterList();
+    }
+
+    function filterList() {
+        const query = searchInput.value.trim().toLowerCase();
+
+        document.querySelectorAll(
+            ".fl-list-panel:not([hidden]) [data-search]"
+        ).forEach(function (item) {
+            item.hidden = !item.dataset.search
+                .toLowerCase()
+                .includes(query);
+        });
+    }
+
+    tabButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            switchTab(button.dataset.tab);
+        });
+    });
+
+    searchInput.addEventListener("input", filterList);
+
+    const savedTab = sessionStorage.getItem("fl-active-tab");
+
+    switchTab(
+        ["chats", "notifications", "requests"].includes(savedTab)
+            ? savedTab
+            : "chats"
+    );
+
+    // Mobile back.
+    if (
+        activeId &&
+        new URLSearchParams(location.search).has("chat")
+    ) {
+        messenger.classList.add("mobile-chat-open");
+    }
+
+    document.getElementById("fl-back")?.addEventListener(
+        "click",
+        function () {
+            messenger.classList.remove("mobile-chat-open");
+        }
+    );
+
+    function scrollBottom() {
+        if (chatHistory) {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+    }
+
+    scrollBottom();
+
+    // Enter sends, Shift+Enter adds a newline.
+    if (form && input) {
+        input.addEventListener("keydown", function (event) {
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.isComposing
+            ) {
+                event.preventDefault();
+
+                if (input.value.trim() && !sendButton.disabled) {
+                    form.requestSubmit();
+                }
+            }
+        });
+    }
+
+    // Get CSRF from any form or Django's cookie.
+    function csrfToken() {
+        const field = document.querySelector(
+            'input[name="csrfmiddlewaretoken"]'
+        );
+
+        if (field) return field.value;
+
+        const found = document.cookie.match(
+            /(?:^|;\s*)csrftoken=([^;]+)/
+        );
+
+        return found ? decodeURIComponent(found[1]) : "";
+    }
+
+    // Mark active incoming messages as read.
+    async function markRead() {
+        if (!activeId || document.hidden) return;
+
+        const token = csrfToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch(
+                "{% if active_chat %}{% url 'conversation_mark_read' active_chat.pk %}{% endif %}",
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": token
+                    }
+                }
+            );
+
+            if (!response.ok) return;
+
+            const result = await response.json();
+
+            if (result.marked_read > 0) {
+                const row = document.querySelector(
+                    '[data-conversation-id="' + activeId + '"]'
+                );
+
+                const badge = row?.querySelector(
+                    "[data-unread-count]"
+                );
+
+                if (badge && badge.textContent.trim() !== "New") {
+                    badge.hidden = true;
+                }
+
+                window.dispatchEvent(
+                    new Event("findloop:messages-read")
+                );
+
+                await window.refreshInboxBadge?.();
+            }
+
+        } catch (error) {
+            console.error("Mark read failed:", error);
+        }
+    }
+
+    // Safely display incoming messages.
+    function appendMessage(data) {
+        if (!chatHistory || !data) return;
+
+        if (Number(data.conversation_id) !== Number(activeId)) {
+            return;
+        }
+
+        const messageId = String(data.id);
+
+        if (chatHistory.querySelector(
+            '[data-message-id="' + messageId + '"]'
+        )) {
+            return;
+        }
+
+        const bubble = document.createElement("div");
+        bubble.className = "fl-bubble";
+        bubble.dataset.messageId = messageId;
+
+        if (Number(data.sender_id) === Number(currentUserId)) {
+            bubble.classList.add("mine");
+        }
+
+        const author = document.createElement("strong");
+        author.textContent = data.sender;
+
+        const message = document.createElement("p");
+        message.textContent = data.content;
+
+        const time = document.createElement("small");
+        time.textContent = new Date(
+            data.created_at
+        ).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+        bubble.append(author, message, time);
+        chatHistory.appendChild(bubble);
+
+        const preview = document.querySelector(
+            '[data-conversation-id="' + activeId + '"] .fl-chat-sub'
+        );
+
+        if (preview) {
+            preview.textContent = data.content;
+        }
+
+        scrollBottom();
+    }
+
+    // Show pending and new-chat activity by reloading.
+    function refreshList() {
+        window.location.reload();
+    }
+
+    if (socket) {
+        socket.on("new_message", async function (data) {
+            const isActive =
+                Number(data.conversation_id) === Number(activeId);
+
+            if (isActive) {
+                appendMessage(data);
+
+                if (
+                    Number(data.sender_id) !== Number(currentUserId) &&
+                    !document.hidden
+                ) {
+                    await markRead();
+                }
+
+            } else {
+                // Only reload if this tab is visible.
+                // Otherwise refresh when the user returns.
+                if (!document.hidden) {
+                    refreshList();
+                }
+            }
+
+            await window.refreshInboxBadge?.();
+        });
+
+        socket.on("contact_request_created", refreshList);
+        socket.on("contact_request_updated", refreshList);
+
+        socket.on("new_notification", function () {
+            const selected = document.querySelector(
+                ".fl-rail-button.active"
+            )?.dataset.tab;
+
+            if (selected === "notifications") {
+                refreshList();
+            }
+        });
+
+        socket.on("connect", function () {
+            window.refreshInboxBadge?.();
+        });
+    }
+
+    // Socket.IO send with normal Django fallback.
+    if (form) {
+        let sending = false;
+
+        form.addEventListener("submit", function (event) {
+            if (!socket || !socket.connected) {
+                return;
+            }
+
+            event.preventDefault();
+
+            if (sending) return;
+
+            const content = input.value.trim();
+            if (!content) return;
+
+            sending = true;
+            sendButton.disabled = true;
+            sendStatus.textContent = "Sending...";
+
+            socket.timeout(10000).emit(
+                "send_message",
+                {
+                    conversation_id: activeId,
+                    content: content
+                },
+                function (error, response) {
+                    sending = false;
+                    sendButton.disabled = false;
+
+                    if (error) {
+                        sendStatus.textContent =
+                            "Delivery unconfirmed. Check before retrying.";
+                        return;
+                    }
+
+                    if (!response || !response.success) {
+                        sendStatus.textContent =
+                            response?.error || "Message failed.";
+                        return;
+                    }
+
+                    input.value = "";
+                    input.focus();
+                    sendStatus.textContent = "";
+                }
+            );
+        });
+    }
+
+    // Accept/reject without leaving the Inbox.
+    const decisionForm = document.getElementById(
+        "fl-decision-form"
+    );
+
+    decisionForm?.addEventListener(
+        "submit",
+        async function (event) {
+            event.preventDefault();
+
+            const data = new FormData(this);
+
+            if (event.submitter) {
+                data.set(
+                    event.submitter.name,
+                    event.submitter.value
+                );
+            }
+
+            try {
+                const response = await fetch(this.action, {
+                    method: "POST",
+                    body: data,
+                    credentials: "same-origin"
+                });
+
+                if (!response.ok) {
+                    alert("Could not update the request.");
+                    return;
+                }
+
+                refreshList();
+
+            } catch (error) {
+                alert("Network error. Please try again.");
+            }
+        }
+    );
+
+    document.addEventListener(
+        "visibilitychange",
+        function () {
+            if (!document.hidden) {
+                window.refreshInboxBadge?.();
+                markRead();
+            }
+        }
+    );
+    
+// Synchronize unread count when a chat opens.
+async function synchronizeOpenedChat() {
+
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    if (!params.has("chat")) {
+        return;
+    }
+
+    // Django has already marked messages as read
+    // when rendering this selected conversation.
+    if (typeof window.refreshInboxBadge === "function") {
+        await window.refreshInboxBadge();
+    }
+
+    // Update the visible conversation badge.
+    const openedRow = document.querySelector(
+        '[data-conversation-id="' + activeId + '"]'
+    );
+
+    const unreadBadge = openedRow?.querySelector(
+        "[data-unread-count]"
+    );
+
+    if (unreadBadge && unreadBadge.textContent.trim() !== "New") {
+        unreadBadge.hidden = true;
+    }
+}
+
+synchronizeOpenedChat();
+
+
+});
+</script>
+
+{% endblock %}

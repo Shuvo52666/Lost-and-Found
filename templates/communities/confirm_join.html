@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<div class="formwrap"><section class="panel"><h1>Join {{ community.name }}?</h1><p>{{ community.description }}</p><form method="post">{% csrf_token %}<button class="button" type="submit">Confirm joining</button></form></section></div>{% endblock %}

@@ -1,0 +1,498 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .post-wizard {
+        max-width: 720px;
+        margin: 25px auto 60px;
+    }
+
+    .wizard-heading {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .wizard-heading h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .wizard-heading p {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .wizard-progress {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin-bottom: 28px;
+    }
+
+    .wizard-step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #94a3b8;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .wizard-step-indicator .step-number {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .wizard-step-indicator.active {
+        color: #087f66;
+    }
+
+    .wizard-step-indicator.active .step-number {
+        background: #087f66;
+        color: white;
+    }
+
+    .wizard-line {
+        width: 55px;
+        height: 2px;
+        background: #cbd5e1;
+    }
+
+    .wizard-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 30px;
+        box-shadow: 0 5px 24px rgba(0,0,0,0.04);
+    }
+
+    .wizard-card h2 {
+        margin: 0 0 8px;
+        font-size: 22px;
+    }
+
+    .wizard-description {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+
+    .wizard-field {
+        margin-bottom: 20px;
+    }
+
+    .wizard-field label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .wizard-field input,
+    .wizard-field select,
+    .wizard-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #ffffff;
+        font: inherit;
+    }
+
+    .wizard-field textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .wizard-field input:focus,
+    .wizard-field select:focus,
+    .wizard-field textarea:focus {
+        outline: 2px solid #087f66;
+        outline-offset: 1px;
+    }
+
+    .wizard-error {
+        color: #b91c1c;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .wizard-info {
+        background: #ecfdf5;
+        color: #065f46;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 22px;
+    }
+
+    .wizard-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .wizard-btn {
+        padding: 12px 22px;
+        border-radius: 9px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .wizard-primary {
+        background: #087f66;
+        color: white;
+    }
+
+    .wizard-secondary {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .wizard-primary:hover {
+        background: #066b56;
+    }
+
+    .question-field {
+        margin-bottom: 17px;
+    }
+
+    .question-field label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .question-field input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        font: inherit;
+    }
+
+    #question-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #step-two {
+        display: none;
+    }
+
+    @media (max-width: 600px) {
+        .wizard-card {
+            padding: 20px;
+        }
+
+        .wizard-heading h1 {
+            font-size: 24px;
+        }
+
+        .wizard-actions {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div class="post-wizard">
+
+    <div class="wizard-heading">
+        <h1>Create Lost & Found Post</h1>
+        <p>Share your item details with your community.</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="wizard-progress">
+
+        <div class="wizard-step-indicator active" id="indicator-one">
+            <span class="step-number">1</span>
+            <span>Post Details</span>
+        </div>
+
+        <div class="wizard-line"></div>
+
+        <div class="wizard-step-indicator" id="indicator-two">
+            <span class="step-number">2</span>
+            <span>Verification</span>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        id="post-create-form"
+    >
+        {% csrf_token %}
+
+        <!-- STEP 1 -->
+        <section class="wizard-card" id="step-one">
+
+            <h2>Post Details</h2>
+
+            <p class="wizard-description">
+                Provide information about your lost or found item.
+            </p>
+
+            {% if form.non_field_errors %}
+                <div class="wizard-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+
+                <div class="wizard-field">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="wizard-error">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+            <div class="wizard-actions">
+
+                <a href="{% url 'feed' %}" class="wizard-btn wizard-secondary">
+                    Cancel
+                </a>
+
+                <button
+                    type="button"
+                    class="wizard-btn wizard-primary"
+                    id="next-btn"
+                >
+                    Next: Verification →
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="wizard-card" id="step-two">
+
+            <h2>Verification Questions</h2>
+
+            <p class="wizard-description">
+                Add questions that can help verify the real owner.
+                This step is completely optional.
+            </p>
+
+            <div class="wizard-info">
+                You can add up to {{ max_questions }} questions.
+                Only add questions that can help confirm ownership.
+                Leave them empty if you don't want any verification questions.
+            </div>
+
+            <div id="question-list">
+
+                {% for item in questions %}
+
+                    <div
+                        class="question-field"
+                        id="question-field-{{ item.number }}"
+                        style="display:none;"
+                    >
+
+                        <label for="question_{{ item.number }}">
+                            Question {{ item.number }}
+                        </label>
+
+                        <input
+                            type="text"
+                            id="question_{{ item.number }}"
+                            name="question_{{ item.number }}"
+                            maxlength="300"
+                            value="{{ item.value }}"
+                            placeholder="Enter a verification question..."
+                        >
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <button
+                type="button"
+                class="wizard-btn wizard-secondary"
+                id="add-question-btn"
+            >
+                + Add Question
+            </button>
+
+            <div class="wizard-actions">
+
+                <button
+                    type="button"
+                    class="wizard-btn wizard-secondary"
+                    id="back-btn"
+                >
+                    ← Back
+                </button>
+
+                <button
+                    type="submit"
+                    class="wizard-btn wizard-secondary"
+                    id="skip-btn"
+                >
+                    Skip & Publish
+                </button>
+
+                <button
+                    type="submit"
+                    class="wizard-btn wizard-primary"
+                    id="publish-btn"
+                >
+                    Publish Post
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("post-create-form");
+    const stepOne = document.getElementById("step-one");
+    const stepTwo = document.getElementById("step-two");
+
+    const indicatorOne = document.getElementById("indicator-one");
+    const indicatorTwo = document.getElementById("indicator-two");
+
+    const nextBtn = document.getElementById("next-btn");
+    const backBtn = document.getElementById("back-btn");
+    const addQuestionBtn = document.getElementById("add-question-btn");
+    const skipBtn = document.getElementById("skip-btn");
+
+    const questionFields = document.querySelectorAll(".question-field");
+
+    const maxQuestions = questionFields.length;
+    let questionCount = 0;
+
+    // Restore existing questions if validation failed.
+    questionFields.forEach(function(field) {
+        const input = field.querySelector("input");
+
+        if (input.value.trim() !== "") {
+            field.style.display = "block";
+            questionCount++;
+        }
+    });
+
+    function showStep(step) {
+
+        if (step === 1) {
+            stepOne.style.display = "block";
+            stepTwo.style.display = "none";
+
+            indicatorOne.classList.add("active");
+            indicatorTwo.classList.remove("active");
+        } else {
+            stepOne.style.display = "none";
+            stepTwo.style.display = "block";
+
+            indicatorOne.classList.remove("active");
+            indicatorTwo.classList.add("active");
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Go to Step 2 only after checking Step 1.
+    nextBtn.addEventListener("click", function() {
+
+        const fields = stepOne.querySelectorAll(
+            "input, select, textarea"
+        );
+
+        for (const field of fields) {
+            if (!field.checkValidity()) {
+                field.reportValidity();
+                return;
+            }
+        }
+
+        showStep(2);
+    });
+
+    backBtn.addEventListener("click", function() {
+        showStep(1);
+    });
+
+    addQuestionBtn.addEventListener("click", function() {
+
+        const hiddenField = Array.from(questionFields).find(
+            field => field.style.display === "none"
+        );
+
+        if (!hiddenField) return;
+
+        hiddenField.style.display = "block";
+        questionCount++;
+
+        if (questionCount >= maxQuestions) {
+            addQuestionBtn.style.display = "none";
+        }
+
+        hiddenField.querySelector("input").focus();
+    });
+
+    // Skip means remove optional question values.
+    skipBtn.addEventListener("click", function() {
+
+        questionFields.forEach(function(field) {
+            field.querySelector("input").value = "";
+        });
+
+    });
+
+    // Initialize question controls.
+    if (questionCount >= maxQuestions) {
+        addQuestionBtn.style.display = "none";
+    }
+
+    // The server validates every field again before saving.
+    form.addEventListener("submit", function() {
+        // Native browser validation and Django validation remain active.
+    });
+
+});
+</script>
+
+{% endblock %}

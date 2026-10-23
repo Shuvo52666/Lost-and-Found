@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block content %}
+<div class="formwrap"><div class="panel"><h1>{{ heading }}</h1><form method="post" {% if multipart %}enctype="multipart/form-data"{% endif %}>
+{% csrf_token %}{% include 'includes/form_fields.html' %}<button class="button" type="submit">{{ submit_label|default:'Save' }}</button></form></div></div>
+{% endblock %}

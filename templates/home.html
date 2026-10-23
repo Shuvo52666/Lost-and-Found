@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block content %}
+<div class="hero"><div class="eyebrow">A safer way to reunite people with what matters</div>
+<h1>Lost something? <span>Let's find it together.</span></h1>
+<p>Join a trusted community, share lost or found items, and connect through verified contact requests.</p>
+<div class="actions">{% if user.is_authenticated %}<a class="button" href="{% url 'feed' %}">Browse community feed →</a><a class="button secondary" href="{% url 'post_create' %}">Create a post</a>{% else %}<a class="button" href="{% url 'signup' %}">Get started →</a><a class="button secondary" href="{% url 'login' %}">I have an account</a>{% endif %}</div></div>
+<div class="featuregrid"><section class="panel"><div class="emoji">⌁</div><h3>Community spaces</h3><p>Keep campus and local lost-and-found activity organized.</p></section><section class="panel"><div class="emoji">◎</div><h3>Lost & found feed</h3><p>Post photos, details and updates in one place.</p></section><section class="panel"><div class="emoji">☑</div><h3>Verification first</h3><p>Approve contact requests before allowing private messages.</p></section></div>
+{% endblock %}

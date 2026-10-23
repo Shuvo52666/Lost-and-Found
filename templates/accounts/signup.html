@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block content %}<div class="formwrap"><section class="panel"><h1>Create account</h1><p>Connect with your community.</p>
+<form method="post">{% csrf_token %}{% include 'includes/form_fields.html' %}<button class="button" type="submit">Sign up</button></form><p>Already registered? <a href="{% url 'login' %}">Log in</a></p></section></div>{% endblock %}
