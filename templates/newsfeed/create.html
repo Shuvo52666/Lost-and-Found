@@ -24,6 +24,8 @@
         font-size: 14px;
     }
 
+    /* PROGRESS */
+
     .wizard-progress {
         display: flex;
         align-items: center;
@@ -66,12 +68,14 @@
         background: #cbd5e1;
     }
 
+    /* CARD */
+
     .wizard-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 18px;
         padding: 30px;
-        box-shadow: 0 5px 24px rgba(0,0,0,0.04);
+        box-shadow: 0 5px 24px rgba(0, 0, 0, 0.04);
     }
 
     .wizard-card h2 {
@@ -84,6 +88,8 @@
         font-size: 14px;
         margin-bottom: 25px;
     }
+
+    /* FIELDS */
 
     .wizard-field {
         margin-bottom: 20px;
@@ -126,6 +132,51 @@
         margin-top: 6px;
     }
 
+    /* FIXED COMMUNITY */
+
+    .fixed-community-field {
+        margin-bottom: 20px;
+    }
+
+    .fixed-community-field label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .fixed-community-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid #bfe1d0;
+        border-radius: 9px;
+        background: #f0f8f4;
+        color: #142b34;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .fixed-community-badge {
+        color: #087f66;
+        background: #d9efe2;
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .fixed-community-help {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    /* VERIFICATION */
+
     .wizard-info {
         background: #ecfdf5;
         color: #065f46;
@@ -134,36 +185,6 @@
         font-size: 13px;
         line-height: 1.6;
         margin-bottom: 22px;
-    }
-
-    .wizard-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 25px;
-    }
-
-    .wizard-btn {
-        padding: 12px 22px;
-        border-radius: 9px;
-        border: none;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .wizard-primary {
-        background: #087f66;
-        color: white;
-    }
-
-    .wizard-secondary {
-        background: #f1f5f9;
-        color: #334155;
-    }
-
-    .wizard-primary:hover {
-        background: #066b56;
     }
 
     .question-field {
@@ -195,6 +216,44 @@
         display: none;
     }
 
+    /* BUTTONS */
+
+    .wizard-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .wizard-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 22px;
+        border-radius: 9px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .wizard-primary {
+        background: #087f66;
+        color: white;
+    }
+
+    .wizard-secondary {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .wizard-primary:hover {
+        background: #066b56;
+    }
+
+    /* MOBILE */
+
     @media (max-width: 600px) {
         .wizard-card {
             padding: 20px;
@@ -207,42 +266,73 @@
         .wizard-actions {
             flex-wrap: wrap;
         }
+
+        .fixed-community-display {
+            flex-wrap: wrap;
+        }
+        .optional-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 400;
+}
     }
 </style>
 
+
 <div class="post-wizard">
 
+    <!-- HEADING -->
+
     <div class="wizard-heading">
-        <h1>Create Lost & Found Post</h1>
+        <h1>Create Lost &amp; Found Post</h1>
         <p>Share your item details with your community.</p>
     </div>
 
-    <!-- Progress Indicator -->
+
+    <!-- PROGRESS -->
+
     <div class="wizard-progress">
 
-        <div class="wizard-step-indicator active" id="indicator-one">
+        <div
+            class="wizard-step-indicator active"
+            id="indicator-one"
+        >
             <span class="step-number">1</span>
             <span>Post Details</span>
         </div>
 
         <div class="wizard-line"></div>
 
-        <div class="wizard-step-indicator" id="indicator-two">
+        <div
+            class="wizard-step-indicator"
+            id="indicator-two"
+        >
             <span class="step-number">2</span>
             <span>Verification</span>
         </div>
 
     </div>
 
+
+    <!-- CREATE POST FORM -->
+
     <form
         method="post"
         enctype="multipart/form-data"
         id="post-create-form"
     >
+
         {% csrf_token %}
 
-        <!-- STEP 1 -->
-        <section class="wizard-card" id="step-one">
+
+        <!-- ===================================
+             STEP 1: POST DETAILS
+        ==================================== -->
+
+        <section
+            class="wizard-card"
+            id="step-one"
+        >
 
             <h2>Post Details</h2>
 
@@ -250,39 +340,88 @@
                 Provide information about your lost or found item.
             </p>
 
+
             {% if form.non_field_errors %}
                 <div class="wizard-error">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            {% for field in form %}
 
-                <div class="wizard-field">
+            <!-- FIXED COMMUNITY -->
 
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                    </label>
+            <div class="fixed-community-field">
 
-                    {{ field }}
+                <label>
+                    Community
+                </label>
 
-                    {% if field.help_text %}
-                        <small>{{ field.help_text }}</small>
-                    {% endif %}
+                <div class="fixed-community-display">
 
-                    {% if field.errors %}
-                        <div class="wizard-error">
-                            {{ field.errors }}
-                        </div>
-                    {% endif %}
+                    <span>
+                        {{ community.name }}
+                    </span>
+
 
                 </div>
 
+                <small class="fixed-community-help">
+                    Your post will be published in the
+                    community you are currently inside.
+                </small>
+
+                {% if form.community.errors %}
+                    <div class="wizard-error">
+                        {{ form.community.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- OTHER POST FIELDS -->
+
+            {% for field in form %}
+
+                {% if field.name != 'community' %}
+
+                    <div class="wizard-field">
+
+                 
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+
+                            {% if field.name == "description" %}
+                                <span class="optional-label">(Optional)</span>
+                            {% endif %}
+                        </label>
+
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="wizard-error">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
             {% endfor %}
+
 
             <div class="wizard-actions">
 
-                <a href="{% url 'feed' %}" class="wizard-btn wizard-secondary">
+                <a
+                    href="{% url 'feed' %}"
+                    class="wizard-btn wizard-secondary"
+                >
                     Cancel
                 </a>
 
@@ -298,21 +437,32 @@
 
         </section>
 
-        <!-- STEP 2 -->
-        <section class="wizard-card" id="step-two">
+
+        <!-- ===================================
+             STEP 2: VERIFICATION
+        ==================================== -->
+
+        <section
+            class="wizard-card"
+            id="step-two"
+        >
 
             <h2>Verification Questions</h2>
 
             <p class="wizard-description">
-                Add questions that can help verify the real owner.
-                This step is completely optional.
+                Add questions that can help verify
+                the real owner. This step is completely optional.
             </p>
 
             <div class="wizard-info">
                 You can add up to {{ max_questions }} questions.
                 Only add questions that can help confirm ownership.
-                Leave them empty if you don't want any verification questions.
+                Leave them empty if you don't want
+                any verification questions.
             </div>
+
+
+            <!-- QUESTIONS -->
 
             <div id="question-list">
 
@@ -343,6 +493,7 @@
 
             </div>
 
+
             <button
                 type="button"
                 class="wizard-btn wizard-secondary"
@@ -350,6 +501,9 @@
             >
                 + Add Question
             </button>
+
+
+            <!-- BUTTONS -->
 
             <div class="wizard-actions">
 
@@ -366,7 +520,7 @@
                     class="wizard-btn wizard-secondary"
                     id="skip-btn"
                 >
-                    Skip & Publish
+                    Skip &amp; Publish
                 </button>
 
                 <button
@@ -385,10 +539,12 @@
 
 </div>
 
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.getElementById("post-create-form");
+
     const stepOne = document.getElementById("step-one");
     const stepTwo = document.getElementById("step-two");
 
@@ -397,16 +553,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const nextBtn = document.getElementById("next-btn");
     const backBtn = document.getElementById("back-btn");
-    const addQuestionBtn = document.getElementById("add-question-btn");
-    const skipBtn = document.getElementById("skip-btn");
 
-    const questionFields = document.querySelectorAll(".question-field");
+    const addQuestionBtn = document.getElementById(
+        "add-question-btn"
+    );
+
+    const skipBtn = document.getElementById("skip-btn");
+    const questionFields = document.querySelectorAll(
+        ".question-field"
+    );
 
     const maxQuestions = questionFields.length;
     let questionCount = 0;
 
-    // Restore existing questions if validation failed.
-    questionFields.forEach(function(field) {
+    // Restore existing questions if validation failed
+    questionFields.forEach(function (field) {
+
         const input = field.querySelector("input");
 
         if (input.value.trim() !== "") {
@@ -415,15 +577,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+
     function showStep(step) {
 
         if (step === 1) {
+
             stepOne.style.display = "block";
             stepTwo.style.display = "none";
 
             indicatorOne.classList.add("active");
             indicatorTwo.classList.remove("active");
+
         } else {
+
             stepOne.style.display = "none";
             stepTwo.style.display = "block";
 
@@ -431,17 +597,22 @@ document.addEventListener("DOMContentLoaded", function () {
             indicatorTwo.classList.add("active");
         }
 
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     }
 
-    // Go to Step 2 only after checking Step 1.
-    nextBtn.addEventListener("click", function() {
+
+    // Validate Step 1 before showing verification
+    nextBtn.addEventListener("click", function () {
 
         const fields = stepOne.querySelectorAll(
             "input, select, textarea"
         );
 
         for (const field of fields) {
+
             if (!field.checkValidity()) {
                 field.reportValidity();
                 return;
@@ -451,17 +622,23 @@ document.addEventListener("DOMContentLoaded", function () {
         showStep(2);
     });
 
-    backBtn.addEventListener("click", function() {
+
+    // Return to Step 1
+    backBtn.addEventListener("click", function () {
         showStep(1);
     });
 
-    addQuestionBtn.addEventListener("click", function() {
+
+    // Add verification question
+    addQuestionBtn.addEventListener("click", function () {
 
         const hiddenField = Array.from(questionFields).find(
             field => field.style.display === "none"
         );
 
-        if (!hiddenField) return;
+        if (!hiddenField) {
+            return;
+        }
 
         hiddenField.style.display = "block";
         questionCount++;
@@ -473,24 +650,20 @@ document.addEventListener("DOMContentLoaded", function () {
         hiddenField.querySelector("input").focus();
     });
 
-    // Skip means remove optional question values.
-    skipBtn.addEventListener("click", function() {
 
-        questionFields.forEach(function(field) {
+    // Skip verification questions
+    skipBtn.addEventListener("click", function () {
+
+        questionFields.forEach(function (field) {
             field.querySelector("input").value = "";
         });
 
     });
 
-    // Initialize question controls.
+
     if (questionCount >= maxQuestions) {
         addQuestionBtn.style.display = "none";
     }
-
-    // The server validates every field again before saving.
-    form.addEventListener("submit", function() {
-        // Native browser validation and Django validation remain active.
-    });
 
 });
 </script>

@@ -3,9 +3,18 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+from django.urls import reverse
+
+def home_redirect(request):
+    if request.user.is_authenticated:
+        return redirect("feed")
+
+    return redirect("login")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path("", home_redirect, name="home"),
     path('accounts/', include('accounts.urls')),
     path('communities/', include('communities.urls')),
     path('feed/', include('newsfeed.urls')),
@@ -13,5 +22,11 @@ urlpatterns = [
     path('inbox/', include('messaging.urls')),
     path('notifications/', include('notifications.urls')),
 ]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

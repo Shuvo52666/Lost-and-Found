@@ -1,0 +1,146 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.report-page {
+    max-width: 600px;
+    margin: 35px auto;
+}
+
+.report-card {
+    background: white;
+    border: 1px solid #dfe9e7;
+    border-radius: 16px;
+    padding: 28px;
+}
+
+.report-card h1 {
+    margin: 0 0 10px;
+    color: #142b34;
+}
+
+.report-subtitle {
+    color: #64748b;
+    margin-bottom: 22px;
+}
+
+.report-target {
+    background: #f4f8f7;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+}
+
+.report-field {
+    margin-bottom: 18px;
+}
+
+.report-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.report-field select,
+.report-field textarea,
+.report-field input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font: inherit;
+}
+
+.report-errors {
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.report-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.report-submit {
+    background: #087f66;
+    color: white;
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 18px;
+    font-weight: 600;
+    cursor: pointer;
+}
+</style>
+
+<div class="report-page">
+
+    <div class="report-card">
+
+        <h1>Report Post</h1>
+
+        <p class="report-subtitle">
+            Tell the community admin why this post
+            should be reviewed.
+        </p>
+
+        <div class="report-target">
+            <strong>{{ post.caption }}</strong>
+            <p>Community: {{ post.community.name }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+
+                <div class="report-field">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div class="report-errors">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+            {% if form.non_field_errors %}
+                <div class="report-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="report-actions">
+
+                <a href="{% url 'post_detail' post.pk %}">
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="report-submit"
+                >
+                    Submit Report
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

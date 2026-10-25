@@ -1,298 +1,2022 @@
 
+
 {% extends 'base.html' %}
 
 {% block content %}
 
-<div class="social-feed-layout">
+<style>
 
-    <!-- Feed Header -->
-    <div class="feed-heading">
-        <div>
-            <h1>Community Feed</h1>
-            <p>Lost and found updates from your communities</p>
-        </div>
+/* =========================================
 
-        <a href="{% url 'post_create' %}" class="button">
-            + Create Post
-        </a>
-    </div>
+   FEED PAGE
 
-    <!-- Search and Filter -->
-    <form method="get" class="feed-filters">
+========================================= */
 
-        <input
-            type="text"
-            name="q"
-            placeholder="Search lost and found items..."
-            value="{{ search_query }}"
+.feed-page {
+
+    max-width: 850px;
+
+    margin: 20px auto 55px;
+
+}
+
+/* =========================================
+
+   COMMUNITY HEADER
+
+========================================= */
+
+.feed-topbar {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 22px;
+
+    padding: 20px 23px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2eae4;
+
+    border-radius: 14px;
+
+}
+
+.feed-top-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    min-width: 0;
+
+}
+
+.feed-community-avatar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 49px;
+
+    height: 49px;
+
+    background: #dcefe3;
+
+    color: #087f66;
+
+    border-radius: 12px;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+}
+
+.feed-community-name {
+
+    min-width: 0;
+
+}
+
+.feed-community-name h1 {
+
+    margin: 0 0 5px;
+
+    font-size: 20px;
+
+    color: #183428;
+
+    overflow-wrap: anywhere;
+
+}
+
+.feed-profile-link {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    border: 0;
+
+    background: transparent;
+
+    padding: 0;
+
+    font: inherit;
+
+    font-size: 12px;
+
+    color: #087f66;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+}
+
+.feed-profile-link:hover {
+
+    text-decoration: underline;
+
+}
+
+.feed-create {
+
+    white-space: nowrap;
+
+}
+
+/* =========================================
+
+   COMMUNITY PROFILE POPUP
+
+========================================= */
+
+.feed-profile-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.48);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9990;
+
+    padding: 20px;
+
+}
+
+.feed-profile-overlay[hidden] {
+
+    display: none !important;
+
+}
+
+.feed-profile-dialog {
+
+    width: 100%;
+
+    max-width: 460px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    box-shadow: 0 22px 65px rgba(0, 0, 0, 0.16);
+
+}
+
+.feed-profile-banner {
+
+    height: 110px;
+
+    background: linear-gradient(
+
+        120deg,
+
+        #087f66,
+
+        #7bc69c
+
+    );
+
+}
+
+.feed-profile-content {
+
+    padding: 24px;
+
+}
+
+.feed-profile-title {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    align-items: flex-start;
+
+}
+
+.feed-profile-title h2 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+    color: #183428;
+
+}
+
+.feed-profile-close {
+
+    border: 0;
+
+    background: #f1f5f2;
+
+    color: #475569;
+
+    width: 33px;
+
+    height: 33px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+}
+
+.feed-profile-description {
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    margin: 15px 0 22px;
+
+    overflow-wrap: anywhere;
+
+}
+
+.feed-detail-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #eef2f0;
+
+    font-size: 13px;
+
+}
+
+.feed-detail-row span {
+
+    color: #64748b;
+
+}
+
+.feed-detail-row strong {
+
+    color: #183428;
+
+    overflow-wrap: anywhere;
+
+    text-align: right;
+
+}
+
+.feed-profile-bottom {
+
+    margin-top: 24px;
+
+}
+
+.feed-profile-bottom a {
+
+    display: block;
+
+    text-decoration: none;
+
+    text-align: center;
+
+    padding: 12px;
+
+    background: #edf7f1;
+
+    color: #087f66;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+/* =========================================
+
+   SEARCH AND FILTER
+
+========================================= */
+
+.feed-filters {
+
+    display: flex;
+
+    gap: 10px;
+
+    align-items: center;
+
+    padding: 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2eae4;
+
+    border-radius: 13px;
+
+    margin-bottom: 22px;
+
+}
+
+.feed-filters input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 12px 13px;
+
+    border: 1px solid #dce4df;
+
+    border-radius: 9px;
+
+    font: inherit;
+
+    background: #ffffff;
+
+}
+
+.feed-filters select {
+
+    min-width: 120px;
+
+    padding: 12px;
+
+    border: 1px solid #dce4df;
+
+    border-radius: 9px;
+
+    font: inherit;
+
+    background: #ffffff;
+
+}
+
+.feed-filters input:focus,
+
+.feed-filters select:focus {
+
+    outline: none;
+
+    border-color: #087f66;
+
+}
+
+/* =========================================
+
+   FACEBOOK STYLE FEED
+
+========================================= */
+
+.facebook-feed {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+
+}
+
+.social-post {
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    scroll-margin-top: 95px;
+
+}
+
+/* =========================================
+
+   POST HEADER
+
+========================================= */
+
+.social-post-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 18px 19px 13px;
+
+}
+
+/* =========================================
+
+   PROFILE PICTURES - POST + COMMENT
+
+========================================= */
+
+.user-avatar,
+
+.comment-avatar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #daece2;
+
+    color: #087f66;
+
+    border-radius: 50%;
+
+    font-weight: 700;
+
+    overflow: hidden;
+
+    padding: 0;
+
+}
+
+.user-avatar {
+
+    width: 43px;
+
+    height: 43px;
+
+    font-size: 17px;
+
+}
+
+.comment-avatar {
+
+    width: 32px;
+
+    height: 32px;
+
+    font-size: 12px;
+
+}
+
+/* Fix uploaded profile picture display */
+
+.user-avatar img.feed-avatar-image,
+
+.comment-avatar img.feed-avatar-image {
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 100%;
+
+    min-height: 100%;
+
+    object-fit: cover;
+
+    object-position: center;
+
+    border-radius: 50%;
+
+}
+
+/* =========================================
+
+   POST AUTHOR INFORMATION
+
+========================================= */
+
+.post-author {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+.post-author strong {
+
+    display: block;
+
+    font-size: 14px;
+
+    color: #0f172a;
+
+}
+
+.post-author span {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+}
+
+/* =========================================
+
+   POST CONTENT
+
+========================================= */
+
+.social-caption {
+
+    padding: 0 19px 17px;
+
+}
+
+.social-caption h3 {
+
+    margin: 0 0 10px;
+
+    font-size: 18px;
+
+    color: #0f172a;
+
+}
+
+.social-caption p {
+
+    margin: 0 0 13px;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    overflow-wrap: anywhere;
+
+}
+
+.social-caption .tagrow {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+}
+
+/* =========================================
+
+   POST IMAGE
+
+========================================= */
+
+.social-post-image {
+
+    display: block;
+
+    width: 100%;
+
+    max-height: 520px;
+
+    object-fit: contain;
+
+    background: #f8fafc;
+
+}
+
+/* =========================================
+
+   COMMENTS TOGGLE
+
+========================================= */
+
+.comments-toggle-row {
+
+    padding: 13px 19px;
+
+    border-top: 1px solid #eef2f0;
+
+}
+
+.comments-toggle-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border: 0;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: #475569;
+
+    font: inherit;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+.comments-toggle-btn:hover {
+
+    color: #087f66;
+
+}
+
+/* =========================================
+
+   COMMENT LIST
+
+========================================= */
+
+.social-comments {
+
+    padding: 8px 19px 17px;
+
+    border-top: 1px solid #eef2f0;
+
+    max-height: 380px;
+
+    overflow-y: auto;
+
+}
+
+.social-comments[hidden] {
+
+    display: none !important;
+
+}
+
+.social-comment {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-top: 12px;
+
+}
+
+.comment-bubble {
+
+    min-width: 0;
+
+    flex: 1;
+
+    background: #f4f7f5;
+
+    border-radius: 12px;
+
+    padding: 11px 14px;
+
+}
+
+.comment-bubble strong {
+
+    font-size: 12px;
+
+    color: #0f172a;
+
+}
+
+.comment-bubble p {
+
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+    color: #475569;
+
+    overflow-wrap: anywhere;
+
+}
+
+.no-comments {
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+}
+
+/* =========================================
+
+   COMMENT INPUT + MESSAGE
+
+========================================= */
+
+.social-action-row {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 14px 19px;
+
+    border-top: 1px solid #eef2f0;
+
+}
+
+.social-comment-form {
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+.social-comment-form input[type="text"] {
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 11px 12px;
+
+    border: 1px solid #dce4df;
+
+    border-radius: 9px;
+
+    font: inherit;
+
+    background: #ffffff;
+
+}
+
+.social-comment-form input[type="text"]:focus {
+
+    outline: none;
+
+    border-color: #087f66;
+
+}
+
+.comment-send-btn {
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background: #edf7f1;
+
+    color: #087f66;
+
+    font-weight: 600;
+
+    padding: 11px 14px;
+
+    cursor: pointer;
+
+}
+
+.social-message-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #087f66;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    padding: 11px 17px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    flex-shrink: 0;
+
+}
+
+.social-message-btn:hover {
+
+    background: #066b56;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+}
+
+/* =========================================
+
+   POST FOOTER
+
+========================================= */
+
+.social-post-footer {
+
+    padding: 12px 19px 16px;
+
+    border-top: 1px solid #eef2f0;
+
+}
+
+.social-post-footer a {
+
+    color: #087f66;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+}
+
+.social-post-footer a:hover {
+
+    text-decoration: underline;
+
+}
+
+/* =========================================
+
+   EMPTY FEED
+
+========================================= */
+
+.feed-empty {
+
+    text-align: center;
+
+    padding: 35px 20px;
+
+}
+
+.feed-empty p {
+
+    color: #64748b;
+
+}
+
+/* =========================================
+
+   RESPONSIVE DESIGN
+
+========================================= */
+
+@media (max-width: 650px) {
+
+    .feed-topbar {
+
+        padding: 16px;
+
+    }
+
+    .feed-community-name h1 {
+
+        font-size: 17px;
+
+    }
+
+    .feed-filters,
+
+    .social-action-row {
+
+        flex-wrap: wrap;
+
+    }
+
+    .feed-filters input,
+
+    .social-comment-form {
+
+        flex-basis: 100%;
+
+    }
+
+    .feed-filters select {
+
+        flex: 1;
+
+    }
+
+    .social-comment-form input[type="text"] {
+
+        width: 100%;
+
+    }
+
+    .social-post-header {
+
+        padding: 15px 13px 12px;
+
+    }
+
+    .social-caption {
+
+        padding: 0 13px 15px;
+
+    }
+
+    .social-comments {
+
+        padding: 8px 13px 15px;
+
+    }
+
+    .comments-toggle-row,
+
+    .social-action-row,
+
+    .social-post-footer {
+
+        padding-left: 13px;
+
+        padding-right: 13px;
+
+    }
+
+}
+
+.social-post-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+}
+
+.report-post-link {
+
+    color: #b45309 !important;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+}
+
+.report-post-link:hover {
+
+    text-decoration: underline;
+
+}
+
+/* Community admin moderation button */
+
+.feed-header-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+}
+
+.feed-manage-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 11px 16px;
+
+    border: 1px solid #c6e2d5;
+
+    border-radius: 9px;
+
+    background: #edf7f1;
+
+    color: #087f66;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+}
+
+.feed-manage-btn:hover {
+
+    background: #dcefe5;
+
+}
+
+/* Single row actions — desktop */
+.feed-page .post-action-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 19px;
+    border-top: 1px solid #eef2f0;
+    background: #fff;
+}
+.feed-page .post-comments-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 11px 10px;
+    white-space: nowrap;
+    border: 0;
+    border-radius: 9px;
+    background: #f1f6f3;
+    color: #365b4e;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.feed-page .post-comments-button:hover,
+.feed-page .post-comments-button[aria-expanded="true"] {
+    background: #dcefe5;
+    color: #087f66;
+}
+.feed-page .post-action-row .social-comment-form {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+.feed-page .post-action-row .social-comment-form input[type="text"] {
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+    padding: 11px 10px;
+    border: 1px solid #dce4df;
+    border-radius: 9px;
+    background: #fff;
+    font-size: 12px;
+}
+.feed-page .post-action-row .comment-send-btn {
+    flex-shrink: 0;
+    padding: 11px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+.feed-page .post-action-row .social-message-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 11px 13px;
+    font-size: 12px;
+}
+.feed-page .post-report-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 11px 9px;
+    border-radius: 9px;
+    color: #b45309;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.feed-page .post-report-btn:hover {
+    background: #fff4e5;
+    color: #92400e;
+}
+.feed-page .social-comments {
+    padding: 12px 19px 18px;
+    border-top: 1px solid #eef2f0;
+    background: #fbfdfb;
+}
+.feed-page .social-comments[hidden] { display: none !important; }
+@media (max-width: 720px) {
+    .feed-page .post-action-row { flex-wrap: wrap; }
+    .feed-page .post-action-row .social-comment-form {
+        flex: 1 1 100%;
+        order: 2;
+    }
+    .feed-page .post-comments-button,
+    .feed-page .post-action-row .social-message-btn,
+    .feed-page .post-report-btn { order: 1; }
+    .feed-page .post-report-btn { margin-left: auto; }
+}
+@media (max-width: 480px) {
+    .feed-page .post-action-row { padding: 12px; gap: 7px; }
+    .feed-page .post-comments-button,
+    .feed-page .post-action-row .social-message-btn,
+    .feed-page .post-report-btn { font-size: 12px; padding: 10px 8px; }
+    .feed-page .social-comments { padding: 12px; }
+}
+
+</style>
+
+<div class="feed-page">
+
+    {% if selected_community %}
+
+        <!-- =====================================
+
+             COMMUNITY HEADER
+
+        ====================================== -->
+
+        <header class="feed-topbar">
+
+            <div class="feed-top-left">
+
+                <div class="feed-community-avatar">
+
+                    {{ selected_community.name|first|upper }}
+
+                </div>
+
+                <div class="feed-community-name">
+
+                    <h1>
+
+                        {{ selected_community.name }}
+
+                    </h1>
+
+                    <button
+
+                        id="open-community-profile"
+
+                        class="feed-profile-link"
+
+                        type="button"
+
+                    >
+
+                        Community Profile →
+
+                    </button>
+
+                </div>
+
+            </div>
+
+<div class="feed-header-actions">
+
+    {% if is_community_owner %}
+
+        <a
+
+            href="{% url 'manage_community_posts' selected_community.pk %}"
+
+            class="feed-manage-btn"
+
         >
 
-        <select name="type">
-            <option value="" {% if not selected_type %}selected{% endif %}>All Posts</option>
-            <option value="lost" {% if selected_type == 'lost' %}selected{% endif %}>Lost</option>
-            <option value="found" {% if selected_type == 'found' %}selected{% endif %}>Found</option>
-        </select>
+            <span>&#9881;</span>
 
-        <button type="submit" class="button">
-            Search
-        </button>
+            Manage Posts
 
-    </form>
+        </a>
 
-    <!-- Vertical Scrolling Newsfeed -->
-    <div class="facebook-feed">
+    {% endif %}
 
-        {% for post in posts %}
+    <a
 
-        <article class="social-post" id="post-{{ post.id }}">
+        href="{% url 'post_create' %}"
 
-            <!-- Author Information -->
-            <div class="social-post-header">
+        class="button feed-create"
 
-                <div class="user-avatar">
-                    {{ post.user.username|first|upper }}
-                </div>
+    >
 
-                <div class="post-author">
-                    <strong>{{ post.user.username }}</strong>
-                    <span>
-                        {{ post.community.name }}
-                        · {{ post.created_at|timesince }} ago
-                    </span>
-                </div>
+        + Create Post
 
-                <span class="tag {{ post.type }}">
-                    {{ post.get_type_display }}
-                </span>
+    </a>
 
-            </div>
+</div>
 
-            <!-- Caption and Description -->
-            <div class="social-caption">
+        </header>
 
-                <h3>{{ post.caption }}</h3>
+        <!-- =====================================
 
-                <p>{{ post.description|linebreaksbr }}</p>
+             SEARCH AND FILTER
 
-                <div class="tagrow">
-                    <span class="tag">
-                        {{ post.get_status_display }}
-                    </span>
-                </div>
+        ====================================== -->
 
-            </div>
+        <form method="get" class="feed-filters">
 
-            <!-- Item Image -->
-            {% if post.image %}
-                <img
-                    class="social-post-image"
-                    src="{{ post.image.url }}"
-                    alt="{{ post.caption }}"
-                    loading="lazy"
-                >
-            {% endif %}
+            <input
 
-            <!-- Comments Toggle -->
-            <div class="comments-toggle-row">
+                name="q"
 
-                <button
-                    type="button"
-                    class="comments-toggle-btn"
-                    aria-expanded="false"
-                    aria-controls="comments-{{ post.pk }}"
-                    onclick="toggleComments(this)"
-                >
-                    <span class="comment-icon">💬</span>
-                    Comments ({{ post.comments.count }})
-                </button>
+                type="search"
 
-            </div>
+                value="{{ search_query|default:'' }}"
 
-            <!-- Comments Hidden Initially -->
-            <div
-                class="social-comments"
-                id="comments-{{ post.pk }}"
-                hidden
+                placeholder="Search this community..."
+
+                aria-label="Search posts"
+
             >
 
-                {% for comment in post.comments.all %}
+            <select
 
-                    <div class="social-comment">
+                name="type"
 
-                        <div class="comment-avatar">
-                            {{ comment.user.username|first|upper }}
-                        </div>
+                aria-label="Post type"
 
-                        <div class="comment-bubble">
+            >
+
+                <option
+
+                    value=""
+
+                    {% if not selected_type %}selected{% endif %}
+
+                >
+
+                    All Posts
+
+                </option>
+
+                <option
+
+                    value="lost"
+
+                    {% if selected_type == 'lost' %}selected{% endif %}
+
+                >
+
+                    Lost
+
+                </option>
+
+                <option
+
+                    value="found"
+
+                    {% if selected_type == 'found' %}selected{% endif %}
+
+                >
+
+                    Found
+
+                </option>
+
+            </select>
+
+            <button
+
+                class="button"
+
+                type="submit"
+
+            >
+
+                Search
+
+            </button>
+
+        </form>
+
+        <!-- =====================================
+
+             FEED POSTS
+
+        ====================================== -->
+
+        <div class="facebook-feed">
+
+            {% for post in posts %}
+
+                <article
+
+                    class="social-post"
+
+                    id="post-{{ post.pk }}"
+
+                >
+
+                    <!-- POST AUTHOR -->
+
+                    <div class="social-post-header">
+
+                        <!-- POST AUTHOR PROFILE PICTURE -->
+
+                        <div class="user-avatar">
+
+    {% if post.user.profile_picture %}
+
+        <img
+
+            src="{{ post.user.profile_picture.url }}"
+
+            alt="{{ post.user.username }}"
+
+            class="feed-avatar-image"
+
+        >
+
+    {% else %}
+
+        {{ post.user.username|first|upper }}
+
+    {% endif %}
+
+</div>
+
+                        <!-- POST AUTHOR NAME -->
+
+                        <div class="post-author">
 
                             <strong>
-                                {{ comment.user.username }}
+
+                                {{ post.user.username }}
+
                             </strong>
 
-                            <p>
-                                {{ comment.content|linebreaksbr }}
-                            </p>
+                            <span>
+
+                                {{ post.community.name }}
+
+                                · {{ post.created_at|timesince }} ago
+
+                            </span>
+
+                        </div>
+
+                        <!-- LOST / FOUND TAG -->
+
+                        <span class="tag {{ post.type }}">
+
+                            {{ post.get_type_display }}
+
+                        </span>
+
+                    </div>
+
+                    <!-- =====================================
+
+                         POST CONTENT
+
+                    ====================================== -->
+
+                    <div class="social-caption">
+
+                        <h3>
+
+                            {{ post.caption }}
+
+                        </h3>
+
+                        <p>
+
+                            {{ post.description|linebreaksbr }}
+
+                        </p>
+
+                        <div class="tagrow">
+
+                            <span class="tag">
+
+                                {{ post.get_status_display }}
+
+                            </span>
 
                         </div>
 
                     </div>
 
-                {% empty %}
+                    <!-- =====================================
 
-                    <p class="no-comments">
-                        No comments yet. Be the first to comment.
-                    </p>
+                         POST IMAGE
 
-                {% endfor %}
+                    ====================================== -->
 
-            </div>
+                    {% if post.image %}
 
-            <!-- Comment Input and Message Button -->
-            <div class="social-action-row">
+                        <img
 
-                <form
-                    method="post"
-                    action="{% url 'post_comment' post.pk %}"
-                    class="social-comment-form"
-                >
+                            class="social-post-image"
 
-                    {% csrf_token %}
+                            src="{{ post.image.url }}"
 
-                    <input
-                        type="hidden"
-                        name="from_feed"
-                        value="1"
-                    >
+                            alt="{{ post.caption }}"
 
-                    <input
-                        type="text"
-                        name="content"
-                        maxlength="1000"
-                        placeholder="Write a comment..."
-                        aria-label="Write a comment"
-                        required
-                    >
+                            loading="lazy"
 
-                    <button
-                        type="submit"
-                        class="comment-send-btn"
-                    >
-                        Send
-                    </button>
-
-                </form>
-
-                <!-- Message / Manage -->
-                {% if post.user_id != user.id %}
-
-                    {% if post.status == 'open' %}
-
-                        <a
-                            href="{% url 'contact_request' post.pk %}"
-                            class="social-message-btn"
                         >
-                            Message
-                        </a>
 
                     {% endif %}
 
-                {% else %}
+                    <!-- POST ACTIONS: ONE ROW -->
+                    <div class="post-action-row">
+                        <button type="button" class="comments-toggle-btn post-comments-button"
+                                aria-expanded="false" aria-controls="comments-{{ post.pk }}"
+                                onclick="toggleComments(this)">
+                            <span aria-hidden="true">&#128172;</span>
+                            Comments ({{ post.comments.count }})
+                        </button>
+
+                        <form method="post" action="{% url 'post_comment' post.pk %}"
+                              class="social-comment-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_feed" value="1">
+                            <input type="text" name="content" maxlength="1000"
+                                   placeholder="Write a comment..." aria-label="Write a comment" required>
+                            <button type="submit" class="comment-send-btn">Send</button>
+                        </form>
+
+                        {% if post.user_id != user.id %}
+                            {% if post.status == 'open' %}
+                                <a href="{% url 'contact_request' post.pk %}"
+                                   class="social-message-btn">Message</a>
+                            {% endif %}
+                            <a href="{% url 'report_post' post.pk %}"
+                               class="post-report-btn"><span aria-hidden="true">&#9873;</span> Report</a>
+                        {% else %}
+                            <a href="{% url 'post_detail' post.pk %}"
+                               class="social-message-btn">Manage</a>
+                        {% endif %}
+                    </div>
+
+                    <!-- HIDDEN COMMENTS BELOW ACTION BAR -->
+                    <div class="social-comments" id="comments-{{ post.pk }}" hidden>
+                        {% for comment in post.comments.all %}
+                            <div class="social-comment">
+                                <div class="comment-avatar">
+                                    {% if comment.user.profile_picture %}
+                                        <img src="{{ comment.user.profile_picture.url }}"
+                                             alt="{{ comment.user.username }}'s profile picture"
+                                             class="feed-avatar-image" loading="lazy">
+                                    {% else %}
+                                        {{ comment.user.username|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="comment-bubble">
+                                    <strong>{{ comment.user.username }}</strong>
+                                    <p>{{ comment.content|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="no-comments">No comments yet. Be the first to comment.</p>
+                        {% endfor %}
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <div class="panel feed-empty">
+
+                    <h3>No posts found</h3>
+
+                    <p>
+
+                        There are no matching posts
+
+                        in this community.
+
+                    </p>
 
                     <a
-                        href="{% url 'post_detail' post.pk %}"
-                        class="social-message-btn"
+
+                        href="{% url 'post_create' %}"
+
+                        class="button"
+
                     >
-                        Manage
+
+                        + Create Post
+
                     </a>
 
-                {% endif %}
+                </div>
 
-            </div>
+            {% endfor %}
 
-            <!-- Post Footer -->
-            <div class="social-post-footer">
-                <a href="{% url 'post_detail' post.pk %}">
-                    View post details
-                </a>
-            </div>
+        </div>
 
-        </article>
+    {% else %}
 
-        {% empty %}
+        <!-- NO COMMUNITY SELECTED -->
 
-        <!-- Empty Feed -->
         <div class="panel feed-empty">
 
-            <h3>No posts found</h3>
+            <h3>No community selected</h3>
 
             <p>
-                Join a community or create your first post.
+
+                Select a community to open its feed.
+
             </p>
 
             <a
+
                 href="{% url 'community_list' %}"
+
                 class="button"
+
             >
-                Explore Communities
+
+                Go to Communities
+
             </a>
 
         </div>
 
-        {% endfor %}
-
-    </div>
+    {% endif %}
 
 </div>
 
-<!-- JavaScript: Show / Hide Comments -->
+<!-- =========================================
+
+     COMMUNITY PROFILE POPUP
+
+========================================= -->
+
+{% if selected_community %}
+
+<div
+
+    id="community-profile-overlay"
+
+    class="feed-profile-overlay"
+
+    hidden
+
+>
+
+    <section
+
+        class="feed-profile-dialog"
+
+        role="dialog"
+
+        aria-modal="true"
+
+        aria-labelledby="community-profile-title"
+
+        tabindex="-1"
+
+    >
+
+        <div class="feed-profile-banner"></div>
+
+        <div class="feed-profile-content">
+
+            <div class="feed-profile-title">
+
+                <h2 id="community-profile-title">
+
+                    {{ selected_community.name }}
+
+                </h2>
+
+                <button
+
+                    type="button"
+
+                    id="close-community-profile"
+
+                    class="feed-profile-close"
+
+                    aria-label="Close community profile"
+
+                >
+
+                    &times;
+
+                </button>
+
+            </div>
+
+            <p class="feed-profile-description">
+
+                {{ selected_community.description|default:"No community description available." }}
+
+            </p>
+
+            <div class="feed-detail-row">
+
+                <span>Community ID</span>
+
+                <strong>
+
+                    {{ selected_community.join_code }}
+
+                </strong>
+
+            </div>
+
+            <div class="feed-detail-row">
+
+                <span>Members</span>
+
+                <strong>
+
+                    {{ member_count }}
+
+                </strong>
+
+            </div>
+
+            <div class="feed-detail-row">
+
+                <span>Community Admin</span>
+
+                <strong>
+
+                    {{ selected_community.admin.username }}
+
+                </strong>
+
+            </div>
+
+            <div class="feed-detail-row">
+
+                <span>Your Role</span>
+
+                <strong>
+
+                    {% if is_community_owner %}
+
+                        Admin
+
+                    {% else %}
+
+                        Member
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+            <div class="feed-profile-bottom">
+
+                <a href="{% url 'community_list' %}">
+
+                    ← Back to My Communities
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endif %}
+
+<!-- =========================================
+
+     JAVASCRIPT
+
+========================================= -->
+
 <script>
-    function toggleComments(button) {
 
-        const commentsId = button.getAttribute("aria-controls");
-        const commentsBox = document.getElementById(commentsId);
+/* =========================================
 
-        if (!commentsBox) {
-            return;
-        }
+   SHOW / HIDE COMMENTS
 
-        const isCurrentlyOpen =
-            button.getAttribute("aria-expanded") === "true";
+========================================= */
 
-        // Hide comments if open, show if closed
-        commentsBox.hidden = isCurrentlyOpen;
+function toggleComments(button) {
 
-        // Update button state
-        button.setAttribute(
-            "aria-expanded",
-            String(!isCurrentlyOpen)
-        );
+    const commentsId = button.getAttribute(
+
+        "aria-controls"
+
+    );
+
+    const commentsBox = document.getElementById(
+
+        commentsId
+
+    );
+
+    if (!commentsBox) {
+
+        return;
+
     }
 
-    // Preserve the comment section after submitting a comment.
-    document.addEventListener("DOMContentLoaded", function () {
+    const isOpen =
 
-        const hash = window.location.hash;
+        button.getAttribute("aria-expanded") === "true";
 
-        if (!hash.startsWith("#post-")) {
+    commentsBox.hidden = isOpen;
+
+    button.setAttribute(
+
+        "aria-expanded",
+
+        String(!isOpen)
+
+    );
+
+}
+
+/* =========================================
+
+   COMMUNITY PROFILE POPUP
+
+========================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const overlay = document.getElementById(
+
+        "community-profile-overlay"
+
+    );
+
+    const openButton = document.getElementById(
+
+        "open-community-profile"
+
+    );
+
+    const closeButton = document.getElementById(
+
+        "close-community-profile"
+
+    );
+
+    const dialog = overlay?.querySelector(
+
+        ".feed-profile-dialog"
+
+    );
+
+    let previousFocus = null;
+
+    function openProfile() {
+
+        if (!overlay) {
+
             return;
+
         }
 
-        const post = document.getElementById(hash.substring(1));
+        previousFocus = document.activeElement;
 
-        if (!post) {
+        overlay.hidden = false;
+
+        document.body.style.overflow = "hidden";
+
+        dialog?.focus();
+
+    }
+
+    function closeProfile() {
+
+        if (!overlay) {
+
             return;
+
         }
 
-        const toggleButton = post.querySelector(".comments-toggle-btn");
+        overlay.hidden = true;
+
+        document.body.style.overflow = "";
+
+        previousFocus?.focus();
+
+    }
+
+    openButton?.addEventListener(
+
+        "click",
+
+        openProfile
+
+    );
+
+    closeButton?.addEventListener(
+
+        "click",
+
+        closeProfile
+
+    );
+
+    /* Close when clicking outside popup */
+
+    overlay?.addEventListener(
+
+        "click",
+
+        function (event) {
+
+            if (event.target === overlay) {
+
+                closeProfile();
+
+            }
+
+        }
+
+    );
+
+    /* Escape key + keyboard focus */
+
+    document.addEventListener(
+
+        "keydown",
+
+        function (event) {
+
+            if (!overlay || overlay.hidden) {
+
+                return;
+
+            }
+
+            if (event.key === "Escape") {
+
+                closeProfile();
+
+                return;
+
+            }
+
+            if (event.key === "Tab" && dialog) {
+
+                const focusables = Array.from(
+
+                    dialog.querySelectorAll(
+
+                        'a[href], button:not([disabled]), input:not([disabled])'
+
+                    )
+
+                );
+
+                if (!focusables.length) {
+
+                    event.preventDefault();
+
+                    dialog.focus();
+
+                    return;
+
+                }
+
+                const first = focusables[0];
+
+                const last = focusables[
+
+                    focusables.length - 1
+
+                ];
+
+                if (
+
+                    event.shiftKey &&
+
+                    document.activeElement === first
+
+                ) {
+
+                    event.preventDefault();
+
+                    last.focus();
+
+                }
+
+                else if (
+
+                    !event.shiftKey &&
+
+                    document.activeElement === last
+
+                ) {
+
+                    event.preventDefault();
+
+                    first.focus();
+
+                }
+
+            }
+
+        }
+
+    );
+
+    /* =========================================
+
+       REOPEN COMMENTS AFTER SUBMIT
+
+    ========================================= */
+
+    const hash = window.location.hash;
+
+    if (hash.startsWith("#post-")) {
+
+        const post = document.getElementById(
+
+            hash.slice(1)
+
+        );
+
+        const button = post?.querySelector(
+
+            ".comments-toggle-btn"
+
+        );
 
         if (
-            toggleButton &&
-            toggleButton.getAttribute("aria-expanded") === "false"
+
+            button &&
+
+            button.getAttribute("aria-expanded") === "false"
+
         ) {
-            toggleComments(toggleButton);
+
+            toggleComments(button);
+
         }
 
-    });
+    }
+
+});
+
 </script>
 
 {% endblock %}

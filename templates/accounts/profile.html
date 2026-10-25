@@ -1,0 +1,630 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+/* =====================================
+   PROFILE PAGE
+===================================== */
+
+.profile-page {
+    max-width: 800px;
+    margin: 20px auto 60px;
+}
+
+.profile-heading {
+    margin-bottom: 25px;
+}
+
+.profile-heading h1 {
+    font-size: 28px;
+    margin: 4px 0 7px;
+    color: #142b34;
+}
+
+.profile-heading p {
+    color: #61747b;
+    margin: 0;
+}
+
+/* =====================================
+   PROFILE CARD
+===================================== */
+
+.profile-card {
+    background: #ffffff;
+    border: 1px solid #dfe9e7;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.profile-cover {
+    height: 120px;
+    background: linear-gradient(
+        120deg,
+        #087f66,
+        #5cbd94
+    );
+}
+
+.profile-content {
+    padding: 0 28px 30px;
+}
+
+/* =====================================
+   PROFILE PICTURE
+===================================== */
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 90px;
+    height: 90px;
+
+    margin-top: -45px;
+
+    border: 5px solid #ffffff;
+    border-radius: 50%;
+
+    background: #dcefe8;
+    color: #087f66;
+
+    font-size: 34px;
+    font-weight: 800;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+.profile-name {
+    margin: 18px 0 4px;
+    font-size: 23px;
+    color: #142b34;
+}
+
+.profile-username {
+    color: #61747b;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* =====================================
+   CHANGE PHOTO FORM
+===================================== */
+
+.profile-picture-section {
+    margin-top: 24px;
+    padding: 22px;
+
+    background: #f4f8f7;
+    border: 1px solid #dfe9e7;
+    border-radius: 12px;
+}
+
+.profile-picture-section h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    color: #142b34;
+}
+
+.profile-picture-section p {
+    margin: 0 0 17px;
+    font-size: 13px;
+    color: #61747b;
+}
+
+.profile-photo-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.profile-photo-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.profile-photo-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 17px;
+
+    border: 1px solid #bfe1d0;
+    border-radius: 9px;
+
+    background: #e5f5ed;
+    color: #087f66;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.profile-photo-button:hover {
+    background: #d8eee2;
+}
+
+/* Hide the native input but keep
+   it accessible through the label. */
+
+.profile-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.profile-file-input:focus-visible + .profile-photo-button {
+    outline: 2px solid #087f66;
+    outline-offset: 3px;
+}
+
+.profile-file-name {
+    color: #61747b;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.profile-save-btn {
+    padding: 11px 20px;
+}
+
+.profile-save-btn[hidden] {
+    display: none !important;
+}
+
+.profile-photo-help {
+    color: #61747b;
+    font-size: 12px;
+}
+
+.profile-picture-errors {
+    color: #b93339;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* =====================================
+   PERSONAL INFORMATION
+===================================== */
+
+.profile-section-title {
+    font-size: 17px;
+    color: #142b34;
+    margin: 30px 0 14px;
+}
+
+.profile-information {
+    border-top: 1px solid #dfe9e7;
+}
+
+.profile-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 18px;
+
+    border-bottom: 1px solid #dfe9e7;
+    padding: 15px 0;
+
+    font-size: 14px;
+}
+
+.profile-info-row span {
+    color: #61747b;
+}
+
+.profile-info-row strong {
+    font-weight: 600;
+    color: #142b34;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* =====================================
+   COMMUNITY STATISTICS
+===================================== */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.profile-stat {
+    background: #f4f8f7;
+    border: 1px solid #dfe9e7;
+    border-radius: 12px;
+    padding: 19px;
+}
+
+.profile-stat strong {
+    display: block;
+    font-size: 27px;
+    color: #087f66;
+}
+
+.profile-stat span {
+    color: #61747b;
+    font-size: 13px;
+}
+
+/* =====================================
+   ACTIONS
+===================================== */
+
+.profile-actions {
+    margin-top: 27px;
+}
+
+/* =====================================
+   MOBILE RESPONSIVE
+===================================== */
+
+@media (max-width: 600px) {
+    .profile-content {
+        padding: 0 17px 22px;
+    }
+
+    .profile-info-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .profile-info-row strong {
+        text-align: left;
+    }
+
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-picture-section {
+        padding: 16px;
+    }
+
+    .profile-heading h1 {
+        font-size: 24px;
+    }
+}
+</style>
+
+
+<div class="profile-page">
+
+    <!-- PAGE HEADING -->
+
+    <div class="profile-heading">
+        <div class="eyebrow">My account</div>
+
+        <h1>User Profile</h1>
+
+        <p>Your FindLoop account information.</p>
+    </div>
+
+
+    <!-- PROFILE CARD -->
+
+    <div class="profile-card">
+
+        <div class="profile-cover"></div>
+
+        <div class="profile-content">
+
+            <!-- USER AVATAR -->
+
+            <div class="profile-avatar">
+
+                {% if user.profile_picture %}
+                    <img
+                        id="profile-avatar-preview"
+                        src="{{ user.profile_picture.url }}"
+                        alt="{{ user.username }}'s profile picture"
+                        class="profile-avatar-image"
+                    >
+                {% else %}
+                    <img
+                        id="profile-avatar-preview"
+                        src=""
+                        alt="Selected profile picture preview"
+                        class="profile-avatar-image"
+                        hidden
+                    >
+
+                    <span id="profile-avatar-initial">
+                        {{ user.username|first|upper }}
+                    </span>
+                {% endif %}
+
+            </div>
+
+
+            <!-- USER INFORMATION -->
+
+            <h2 class="profile-name">
+                {{ user.get_full_name|default:user.username }}
+            </h2>
+
+            <p class="profile-username">
+                @{{ user.username }}
+            </p>
+
+
+            <!-- PROFILE PICTURE UPLOAD -->
+
+            <section class="profile-picture-section">
+
+                <h3>Profile Picture</h3>
+
+                <p>
+                    Upload or change your profile picture.
+                </p>
+
+                <form
+                    method="post"
+                    action="{% url 'profile' %}"
+                    enctype="multipart/form-data"
+                    class="profile-photo-form"
+                >
+
+                    {% csrf_token %}
+
+                    <div class="profile-photo-controls">
+
+                        <input
+                            type="file"
+                            id="profile-picture-input"
+                            name="profile_picture"
+                            accept="image/jpeg,image/png,image/webp"
+                            class="profile-file-input"
+                            required
+                        >
+
+                        <label
+                            for="profile-picture-input"
+                            class="profile-photo-button"
+                        >
+                            Change Photo
+                        </label>
+
+                        <span
+                            id="selected-photo-name"
+                            class="profile-file-name"
+                        >
+                            No file selected
+                        </span>
+
+                    </div>
+
+                    <small class="profile-photo-help">
+                        JPG, PNG or WebP. Maximum 5 MB.
+                    </small>
+
+                    {% if form %}
+
+                        {% for error in form.profile_picture.errors %}
+                            <p class="profile-picture-errors">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+
+                        {% for error in form.non_field_errors %}
+                            <p class="profile-picture-errors">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <button
+                        type="submit"
+                        class="button profile-save-btn"
+                        id="save-profile-photo"
+                        hidden
+                    >
+                        Save Photo
+                    </button>
+
+                </form>
+
+            </section>
+
+
+            <!-- PERSONAL INFORMATION -->
+
+            <h3 class="profile-section-title">
+                Personal Information
+            </h3>
+
+            <div class="profile-information">
+
+                <div class="profile-info-row">
+                    <span>Username</span>
+                    <strong>{{ user.username }}</strong>
+                </div>
+
+                <div class="profile-info-row">
+                    <span>Full Name</span>
+                    <strong>
+                        {{ user.get_full_name|default:"Not provided" }}
+                    </strong>
+                </div>
+
+                <div class="profile-info-row">
+                    <span>Email Address</span>
+                    <strong>{{ user.email }}</strong>
+                </div>
+
+                <div class="profile-info-row">
+                    <span>Member Since</span>
+                    <strong>
+                        {{ user.date_joined|date:"F d, Y" }}
+                    </strong>
+                </div>
+
+                <div class="profile-info-row">
+                    <span>Account Type</span>
+                    <strong>
+                        {% if user.is_superuser %}
+                            Superuser
+                        {% elif user.is_staff %}
+                            Staff
+                        {% else %}
+                            Member
+                        {% endif %}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <!-- COMMUNITY STATISTICS -->
+
+            <h3 class="profile-section-title">
+                My Communities
+            </h3>
+
+            <div class="profile-stats">
+
+                <div class="profile-stat">
+                    <strong>{{ managed_count }}</strong>
+                    <span>Communities Managed</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>{{ joined_count }}</strong>
+                    <span>Communities Joined</span>
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="profile-actions">
+
+                <a
+                    href="{% url 'community_list' %}"
+                    class="button"
+                >
+                    View My Communities
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PROFILE PICTURE PREVIEW -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById(
+        "profile-picture-input"
+    );
+
+    const preview = document.getElementById(
+        "profile-avatar-preview"
+    );
+
+    const initial = document.getElementById(
+        "profile-avatar-initial"
+    );
+
+    const fileName = document.getElementById(
+        "selected-photo-name"
+    );
+
+    const saveButton = document.getElementById(
+        "save-profile-photo"
+    );
+
+    let previewURL = null;
+
+    if (!fileInput) {
+        return;
+    }
+
+    fileInput.addEventListener("change", function () {
+
+        const file = fileInput.files[0];
+
+        if (previewURL) {
+            URL.revokeObjectURL(previewURL);
+            previewURL = null;
+        }
+
+        if (!file) {
+            fileName.textContent = "No file selected";
+            saveButton.hidden = true;
+            return;
+        }
+
+        fileName.textContent = file.name;
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("Please choose a JPG, PNG or WebP image.");
+            fileInput.value = "";
+            saveButton.hidden = true;
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Profile picture must be 5 MB or smaller.");
+            fileInput.value = "";
+            saveButton.hidden = true;
+            return;
+        }
+
+        previewURL = URL.createObjectURL(file);
+
+        preview.src = previewURL;
+        preview.hidden = false;
+
+        if (initial) {
+            initial.hidden = true;
+        }
+
+        saveButton.hidden = false;
+    });
+
+    window.addEventListener("pagehide", function () {
+        if (previewURL) {
+            URL.revokeObjectURL(previewURL);
+        }
+    });
+});
+</script>
+
+{% endblock %}

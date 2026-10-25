@@ -1,3 +1,407 @@
-{% extends 'base.html' %}{% block content %}<div class="pagehead"><div><div class="eyebrow">Your spaces</div><h1>Communities</h1><p>Private feeds for your campus, organization or neighborhood.</p></div><a href="{% url 'community_create' %}" class="button">+ Create community</a></div>
-<section class="panel"><h3>Join with an ID</h3><form class="inlineform" method="post" action="{% url 'community_join' %}">{% csrf_token %}{{ join_form.code }}<button class="button" type="submit">Join</button></form><small>Community links and QR codes also work.</small></section>
-<div class="cards">{% for c in communities %}<a class="panel cardlink" href="{% url 'community_detail' c.pk %}"><span class="tag">Community</span><h3>{{ c.name }}</h3><p>{{ c.description|truncatewords:24 }}</p><span>View community →</span></a>{% empty %}<div class="panel"><p>You haven't joined any communities yet. Create one or join using an ID.</p></div>{% endfor %}</div>{% endblock %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.mc-page {
+    max-width: 1120px;
+    margin: 26px auto 60px;
+}
+
+.mc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+}
+
+.mc-top h1 {
+    font-size: 29px;
+    margin: 5px 0 7px;
+    color: #182e27;
+}
+
+.mc-top p {
+    margin: 0;
+    color: #73837b;
+    font-size: 14px;
+}
+
+.mc-join {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 21px 24px;
+    margin-bottom: 30px;
+    background: #fff;
+    border: 1px solid #e1e9e4;
+    border-radius: 15px;
+}
+
+.mc-join-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.mc-join-info h3 {
+    margin: 0 0 5px;
+    color: #1d382e;
+    font-size: 16px;
+}
+
+.mc-join-info p {
+    margin: 0;
+    color: #74857d;
+    font-size: 12px;
+}
+
+.mc-join-form {
+    display: flex;
+    gap: 9px;
+    flex: 1;
+    min-width: 260px;
+    max-width: 465px;
+}
+
+.mc-join-form input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #d9e4dc;
+    border-radius: 9px;
+    background: #f9fbfa;
+    padding: 12px 14px;
+    font: inherit;
+}
+
+.mc-join-form input:focus {
+    outline: none;
+    border-color: #087f66;
+}
+
+.mc-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.mc-section-head h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #1d382e;
+}
+
+.mc-section-head small {
+    color: #7c8a84;
+}
+
+.mc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.mc-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid #e2eae4;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.mc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 25px rgba(25, 60, 42, .07);
+}
+
+.mc-card[hidden] {
+    display: none !important;
+}
+
+.mc-card-accent {
+    height: 7px;
+    background: #8abfa5;
+}
+
+.mc-card.admin .mc-card-accent {
+    background: #087f66;
+}
+
+.mc-card-content {
+    padding: 21px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.mc-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 17px;
+}
+
+.mc-role {
+    background: #eaf5ee;
+    color: #087f66;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 50px;
+}
+
+.mc-role.member {
+    background: #eff3f7;
+    color: #526b81;
+}
+
+.mc-code {
+    font-size: 11px;
+    color: #8a9890;
+}
+
+.mc-card h3 {
+    margin: 0 0 9px;
+    font-size: 17px;
+    color: #21382d;
+}
+
+.mc-card-description {
+    flex: 1;
+    min-height: 57px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #748078;
+    margin: 0 0 20px;
+}
+
+.mc-open {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #eef7f1;
+    color: #087f66;
+    border-radius: 9px;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.mc-open:hover {
+    color: #056b55;
+    background: #dff0e5;
+}
+
+.mc-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+
+.mc-more {
+    padding: 12px 24px;
+    border: 1px solid #bdd9c8;
+    border-radius: 10px;
+    background: white;
+    color: #087f66;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mc-more:hover {
+    background: #edf7f1;
+}
+
+.mc-empty {
+    padding: 35px;
+    text-align: center;
+    background: #fff;
+    border: 1px dashed #cbd8cf;
+    border-radius: 14px;
+    color: #64748b;
+}
+
+@media (max-width: 900px) {
+    .mc-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 590px) {
+    .mc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mc-join {
+        padding: 18px;
+    }
+
+    .mc-join-form {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .mc-top h1 {
+        font-size: 25px;
+    }
+}
+</style>
+
+<div class="mc-page">
+
+    <!-- HEADING -->
+    <div class="mc-top">
+        <div>
+            <div class="eyebrow">Your spaces</div>
+            <h1>My Communities</h1>
+            <p>Choose a community to explore its lost and found feed.</p>
+        </div>
+
+        <a href="{% url 'community_create' %}" class="button">
+            + Create Community
+        </a>
+    </div>
+
+    <!-- ONLY JOIN BY ID -->
+    <section class="mc-join">
+        <div class="mc-join-info">
+            <h3>Join a Community</h3>
+            <p>Have an invite ID? Enter it to join a community.</p>
+        </div>
+
+        <form
+            method="post"
+            action="{% url 'community_join' %}"
+            class="mc-join-form"
+        >
+            {% csrf_token %}
+            {{ join_form.code }}
+
+            <button type="submit" class="button">
+                Join
+            </button>
+        </form>
+    </section>
+
+    <!-- ONE COMBINED COMMUNITY LIST -->
+    <div class="mc-section-head">
+        <h2>Your Communities</h2>
+        <small>{{ communities.count }} communities</small>
+    </div>
+
+    <div class="mc-grid" id="mc-grid">
+
+        {% for c in communities %}
+
+            <article
+                class="mc-card {% if c.admin_id == user.id %}admin{% endif %}"
+                {% if forloop.counter > 6 %}hidden{% endif %}
+            >
+                <div class="mc-card-accent"></div>
+
+                <div class="mc-card-content">
+
+                    <div class="mc-card-meta">
+
+                        {% if c.admin_id == user.id %}
+                            <span class="mc-role">
+                                Admin
+                            </span>
+                        {% else %}
+                            <span class="mc-role member">
+                                Member
+                            </span>
+                        {% endif %}
+
+                        <span class="mc-code">
+                            ID: {{ c.join_code }}
+                        </span>
+
+                    </div>
+
+                    <h3>{{ c.name }}</h3>
+
+                    <p class="mc-card-description">
+                        {{ c.description|default:"No description available."|truncatewords:23 }}
+                    </p>
+
+                    <a
+                        class="mc-open"
+                        href="{% url 'enter_community' c.pk %}"
+                    >
+                        <span>Open Community Feed</span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+
+                </div>
+            </article>
+
+        {% empty %}
+
+            <div class="mc-empty">
+                You haven't joined a community yet.
+                Join with an ID or create your first community.
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% if communities.count > 6 %}
+        <div class="mc-more-wrap">
+            <button
+                class="mc-more"
+                id="mc-view-all"
+                type="button"
+                aria-expanded="false"
+            >
+                View All Communities
+            </button>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("mc-view-all");
+    const grid = document.getElementById("mc-grid");
+
+    if (!button || !grid) return;
+
+    const cards = Array.from(
+        grid.querySelectorAll(".mc-card")
+    );
+
+    let expanded = false;
+
+    button.addEventListener("click", function () {
+        expanded = !expanded;
+
+        cards.forEach(function (card, index) {
+            card.hidden = !expanded && index >= 6;
+        });
+
+        button.textContent = expanded
+            ? "Show Less"
+            : "View All Communities";
+
+        button.setAttribute(
+            "aria-expanded",
+            String(expanded)
+        );
+    });
+});
+</script>
+
+{% endblock %}

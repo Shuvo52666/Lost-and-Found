@@ -1,0 +1,160 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.moderation-page {
+    max-width: 760px;
+    margin: 30px auto 60px;
+}
+
+.moderation-card {
+    background: white;
+    border: 1px solid #dfe9e7;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 18px;
+}
+
+.moderation-card h1,
+.moderation-card h2 {
+    color: #142b34;
+}
+
+.moderation-card p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.moderation-image {
+    max-width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.report-entry {
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    margin-top: 12px;
+    background: #f8fafc;
+}
+
+.moderation-delete {
+    background: #b91c1c;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 600;
+}
+</style>
+
+<div class="moderation-page">
+
+    <a href="{% url 'manage_community_posts' post.community.pk %}">
+        ← Back to Manage Posts
+    </a>
+
+    <div class="moderation-card">
+
+        <h1>Manage Reported Post</h1>
+
+        <h2>{{ post.caption }}</h2>
+
+        <p>
+            Author: @{{ post.user.username }}
+        </p>
+
+        <p>
+            Community: {{ post.community.name }}
+        </p>
+
+        {% if post.description %}
+            <p>{{ post.description|linebreaksbr }}</p>
+        {% endif %}
+
+        {% if post.image %}
+            <img
+                src="{{ post.image.url }}"
+                alt="{{ post.caption }}"
+                class="moderation-image"
+            >
+        {% endif %}
+
+        <p>
+            Status: {{ post.get_status_display }}
+        </p>
+
+        <a href="{% url 'post_detail' post.pk %}">
+            View Original Post
+        </a>
+
+    </div>
+
+
+    <div class="moderation-card">
+
+        <h2>User Reports ({{ reports.count }})</h2>
+
+        {% for report in reports %}
+
+            <div class="report-entry">
+
+                <strong>
+                    Reason: {{ report.get_reason_display }}
+                </strong>
+
+                {% if report.description %}
+                    <p>
+                        {{ report.description|linebreaksbr }}
+                    </p>
+                {% endif %}
+
+            </div>
+
+        {% empty %}
+
+            <p>
+                No reports have been submitted
+                for this post.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div class="moderation-card">
+
+        <h2>Moderation Actions</h2>
+
+        <p>
+            Removing this post deletes it from FindLoop.
+            Review the reports before taking action.
+        </p>
+
+        <form
+            method="post"
+            action="{% url 'admin_delete_post' post.pk %}"
+            onsubmit="return confirm('Permanently remove this post?');"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="moderation-delete"
+            >
+                Remove Post
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

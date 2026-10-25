@@ -1,0 +1,253 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.my-community-page {
+    max-width: 1100px;
+    margin: 35px auto;
+    padding: 0 18px 60px;
+}
+
+.mc-heading {
+    margin-bottom: 25px;
+}
+
+.mc-heading h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.mc-heading p {
+    color: #64748b;
+    margin: 0;
+}
+
+.mc-search {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 35px;
+}
+
+.mc-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid #dbe4df;
+    border-radius: 12px;
+    font: inherit;
+}
+
+.mc-search button,
+.mc-open {
+    background: #087f66;
+    color: white;
+    border: 0;
+    border-radius: 11px;
+    padding: 13px 19px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.mc-section {
+    margin-top: 32px;
+}
+
+.mc-section h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.mc-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(255px, 1fr)
+    );
+    gap: 16px;
+}
+
+.mc-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.mc-card h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.mc-card p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.mc-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.mc-tag {
+    background: #eef7f2;
+    color: #087f66;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.mc-open {
+    display: inline-block;
+}
+
+.mc-empty {
+    padding: 30px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    color: #64748b;
+}
+
+.mc-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+    .mc-search {
+        flex-direction: column;
+    }
+}
+</style>
+
+<div class="my-community-page">
+
+    <div class="mc-heading">
+        <h1>My Communities</h1>
+        <p>
+            Manage your communities and choose
+            which feed to explore.
+        </p>
+    </div>
+
+    <!-- COMMUNITY SEARCH -->
+    <form method="get" class="mc-search">
+        <input
+            type="text"
+            name="community_id"
+            value="{{ search_id }}"
+            placeholder="Search community by ID..."
+            inputmode="numeric"
+            required
+        >
+
+        <button type="submit">
+            Search
+        </button>
+    </form>
+
+    {% if search_error %}
+        <p class="mc-error">{{ search_error }}</p>
+    {% endif %}
+
+    {% if search_result %}
+        <section class="mc-section">
+            <h2>Search Result</h2>
+
+            <div class="mc-grid">
+                <div class="mc-card">
+                    <h3>{{ search_result.name }}</h3>
+                    <p>Community ID: {{ search_result.pk }}</p>
+
+                    <p>
+                        {{ search_result.description|default:"No description." }}
+                    </p>
+
+                    <a
+                        href="{% url 'enter_community' search_result.pk %}"
+                        class="mc-open"
+                    >
+                        Open Community
+                    </a>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- OWNED COMMUNITIES -->
+    <section class="mc-section">
+        <h2>Communities I Manage</h2>
+
+        <div class="mc-grid">
+            {% for community in owned_communities %}
+                <div class="mc-card">
+                    <h3>{{ community.name }}</h3>
+
+                    <div class="mc-meta">
+                        <span class="mc-tag">Admin</span>
+                        <span class="mc-tag">
+                            ID: {{ community.pk }}
+                        </span>
+                    </div>
+
+                    <p>
+                        {{ community.description|default:"No description."|truncatechars:110 }}
+                    </p>
+
+                    <a
+                        href="{% url 'enter_community' community.pk %}"
+                        class="mc-open"
+                    >
+                        Open Feed
+                    </a>
+                </div>
+            {% empty %}
+                <div class="mc-empty">
+                    You don't manage any communities yet.
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- JOINED COMMUNITIES -->
+    <section class="mc-section">
+        <h2>Communities I've Joined</h2>
+
+        <div class="mc-grid">
+            {% for community in joined_communities %}
+                <div class="mc-card">
+                    <h3>{{ community.name }}</h3>
+
+                    <div class="mc-meta">
+                        <span class="mc-tag">Member</span>
+                        <span class="mc-tag">
+                            ID: {{ community.pk }}
+                        </span>
+                    </div>
+
+                    <p>
+                        {{ community.description|default:"No description."|truncatechars:110 }}
+                    </p>
+
+                    <a
+                        href="{% url 'enter_community' community.pk %}"
+                        class="mc-open"
+                    >
+                        Open Feed
+                    </a>
+                </div>
+            {% empty %}
+                <div class="mc-empty">
+                    You haven't joined any communities yet.
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

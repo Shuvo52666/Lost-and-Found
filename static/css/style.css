@@ -96,13 +96,13 @@ p {
   min-height: 76vh;
   padding: 38px 0 70px;
 }
-.footer {
+/* .footer {
   text-align: center;
   border-top: 1px solid var(--line);
   padding: 25px;
   color: var(--muted);
   font-size: 0.85rem;
-}
+} */
 .hero {
   text-align: center;
   max-width: 760px;
@@ -890,4 +890,180 @@ code {
 /* Hide the old page title spacing when Inbox is active */
 .fl-messenger .fl-list-panel[hidden] {
     display: none !important;
+}
+
+
+/* ====================================
+   FINDLOOP NAVBAR PROFILE
+==================================== */
+
+.nav-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 5px;
+
+    border: 1px solid #0b7761;
+    border-radius: 30px;
+
+    background: #ffffff;
+    color: #142b34;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.nav-profile:hover {
+    background: #f4f8f7;
+    color: #087f66;
+    text-decoration: none;
+}
+
+.nav-profile-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    background: #dcefe8;
+    color: #087f66;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.nav-profile-avatar {
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.nav-profile-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+
+/* =========================================
+   FEED HEADER BUTTON FIX
+========================================= */
+
+.feed-page .feed-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Both buttons use matching dimensions */
+
+.feed-page .feed-header-actions .feed-manage-btn,
+.feed-page .feed-header-actions .feed-create {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 46px;
+    padding: 0 20px !important;
+
+    box-sizing: border-box;
+    border-radius: 10px;
+
+    font-size: 14px !important;
+    font-weight: 700;
+    line-height: 1.2;
+
+    text-decoration: none !important;
+    white-space: nowrap;
+
+    transition: background 0.2s ease;
+}
+
+/* Manage Posts: light green */
+
+.feed-page .feed-header-actions .feed-manage-btn {
+    background: #edf7f1 !important;
+    color: #087f66 !important;
+    border: 1px solid #bfe1d0 !important;
+    gap: 8px;
+}
+
+.feed-page .feed-header-actions .feed-manage-btn:hover {
+    background: #dcefe5 !important;
+}
+
+/* Create Post: dark green */
+
+.feed-page .feed-header-actions .feed-create {
+    background: #087f66 !important;
+    color: #ffffff !important;
+    border: 1px solid #087f66 !important;
+}
+
+.feed-page .feed-header-actions .feed-create:hover {
+    background: #066b56 !important;
+}
+
+/* =========================================
+   POST FOOTER FIX
+========================================= */
+
+.feed-page .social-post-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 16px;
+    padding: 16px 19px;
+}
+
+.feed-page .social-post-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Report button style */
+
+.feed-page .social-post-footer .report-post-link {
+    color: #b45309 !important;
+}
+
+.feed-page .social-post-footer .report-post-link:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 650px) {
+
+    .feed-page .feed-header-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .feed-page .feed-header-actions .feed-manage-btn,
+    .feed-page .feed-header-actions .feed-create {
+        flex: 1;
+        padding: 12px !important;
+        font-size: 12px !important;
+    }
 }

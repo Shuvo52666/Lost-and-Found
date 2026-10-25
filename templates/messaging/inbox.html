@@ -4,6 +4,10 @@
 {% block content %}
 
 <style>
+/* ==========================================
+   FINDLOOP MESSENGER LAYOUT
+========================================== */
+
 body:has(.fl-messenger) {
     overflow: hidden;
 }
@@ -20,7 +24,6 @@ body:has(.fl-messenger) .footer {
     display: none;
 }
 
-/* Main layout */
 .fl-messenger {
     display: grid;
     grid-template-columns: 62px 320px minmax(0, 1fr);
@@ -33,7 +36,10 @@ body:has(.fl-messenger) .footer {
     box-sizing: border-box;
 }
 
-/* Icon rail */
+/* ==========================================
+   LEFT ICON RAIL
+========================================== */
+
 .fl-rail {
     display: flex;
     flex-direction: column;
@@ -92,7 +98,14 @@ body:has(.fl-messenger) .footer {
     font-weight: 700;
 }
 
-/* Conversation sidebar */
+.fl-rail-count[hidden] {
+    display: none !important;
+}
+
+/* ==========================================
+   CONVERSATION SIDEBAR
+========================================== */
+
 .fl-sidebar {
     display: flex;
     flex-direction: column;
@@ -131,7 +144,6 @@ body:has(.fl-messenger) .footer {
     border-color: #087f66;
 }
 
-/* Independent scrolling */
 .fl-list {
     flex: 1;
     min-height: 0;
@@ -160,18 +172,46 @@ body:has(.fl-messenger) .footer {
     background: #e8f5ee;
 }
 
+/* ==========================================
+   PROFILE AVATAR FIX
+========================================== */
+
 .fl-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 43px;
     height: 43px;
+    min-width: 43px;
+    min-height: 43px;
+
     flex-shrink: 0;
+    overflow: hidden;
+
     border-radius: 50%;
     background: #d8ece2;
     color: #087f66;
+
+    font-size: 16px;
     font-weight: 700;
+    padding: 0;
 }
+
+.fl-avatar .fl-avatar-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+}
+
+/* ==========================================
+   CHAT LIST INFORMATION
+========================================== */
 
 .fl-chat-info {
     min-width: 0;
@@ -232,7 +272,10 @@ body:has(.fl-messenger) .footer {
     display: none !important;
 }
 
-/* Notifications and requests */
+/* ==========================================
+   NOTIFICATIONS AND REQUESTS
+========================================== */
+
 .fl-activity-item {
     padding: 14px;
     border-bottom: 1px solid #eef2f7;
@@ -269,7 +312,10 @@ body:has(.fl-messenger) .footer {
     text-align: center;
 }
 
-/* Right chat */
+/* ==========================================
+   RIGHT CHAT AREA
+========================================== */
+
 .fl-chat-pane {
     display: flex;
     flex-direction: column;
@@ -297,6 +343,7 @@ body:has(.fl-messenger) .footer {
 .fl-chat-header-main strong {
     display: block;
     font-size: 15px;
+    color: #0f172a;
 }
 
 .fl-chat-header-main small {
@@ -312,6 +359,10 @@ body:has(.fl-messenger) .footer {
     white-space: nowrap;
     text-decoration: none;
 }
+
+/* ==========================================
+   MESSAGE HISTORY
+========================================== */
 
 .fl-chat-history {
     display: flex;
@@ -360,7 +411,10 @@ body:has(.fl-messenger) .footer {
     text-align: right;
 }
 
-/* Locked chat */
+/* ==========================================
+   LOCKED CHAT AND APPROVAL
+========================================== */
+
 .fl-locked {
     flex-shrink: 0;
     background: #fffbeb;
@@ -395,7 +449,10 @@ body:has(.fl-messenger) .footer {
     color: #991b1b;
 }
 
-/* Message input */
+/* ==========================================
+   MESSAGE INPUT
+========================================== */
+
 .fl-chat-footer {
     flex-shrink: 0;
     background: white;
@@ -437,7 +494,7 @@ body:has(.fl-messenger) .footer {
 }
 
 .fl-send-button:disabled {
-    opacity: .6;
+    opacity: 0.6;
 }
 
 #fl-send-status {
@@ -451,14 +508,20 @@ body:has(.fl-messenger) .footer {
     display: none;
 }
 
-/* Thin scrollbars */
+/* ==========================================
+   SCROLLBARS
+========================================== */
+
 .fl-list,
 .fl-chat-history {
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
 }
 
-/* Responsive */
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
 @media (max-width: 900px) {
     .fl-messenger {
         grid-template-columns: 55px 270px minmax(0, 1fr);
@@ -499,10 +562,18 @@ body:has(.fl-messenger) .footer {
 }
 </style>
 
+
+<!-- ==========================================
+     MAIN MESSENGER
+========================================== -->
+
 <div class="fl-messenger" id="fl-messenger">
 
     <!-- LEFT ICON MENU -->
+
     <aside class="fl-rail">
+
+        <!-- CHATS -->
 
         <button
             type="button"
@@ -514,12 +585,17 @@ body:has(.fl-messenger) .footer {
             <svg viewBox="0 0 24 24">
                 <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.2 0-2.35-.25-3.39-.7L3 21l1.84-5.33A8.46 8.46 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5Z"/>
             </svg>
+
             <span
                 id="fl-chats-count"
                 class="fl-rail-count"
                 {% if not unread_message_count %}hidden{% endif %}
-            >{{ unread_message_count|default:0 }}</span>
+            >
+                {{ unread_message_count|default:0 }}
+            </span>
         </button>
+
+        <!-- NOTIFICATIONS -->
 
         <button
             type="button"
@@ -532,12 +608,17 @@ body:has(.fl-messenger) .footer {
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
                 <path d="M10 21h4"/>
             </svg>
+
             <span
                 id="fl-notifications-count"
                 class="fl-rail-count"
                 {% if not unread_notification_count %}hidden{% endif %}
-            >{{ unread_notification_count|default:0 }}</span>
+            >
+                {{ unread_notification_count|default:0 }}
+            </span>
         </button>
+
+        <!-- RECENT REQUESTS -->
 
         <button
             type="button"
@@ -550,19 +631,29 @@ body:has(.fl-messenger) .footer {
                 <path d="M8 6h13M8 12h13M8 18h13"/>
                 <path d="M3 6h.01M3 12h.01M3 18h.01"/>
             </svg>
+
             <span
                 id="fl-requests-count"
                 class="fl-rail-count"
                 {% if not pending_request_count %}hidden{% endif %}
-            >{{ pending_request_count|default:0 }}</span>
+            >
+                {{ pending_request_count|default:0 }}
+            </span>
         </button>
 
     </aside>
 
-    <!-- LEFT SCROLLABLE LIST -->
+
+    <!-- ==========================================
+         LEFT CONVERSATION SIDEBAR
+    =========================================== -->
+
     <aside class="fl-sidebar">
 
-        <div class="fl-sidebar-heading" id="fl-sidebar-heading">
+        <div
+            class="fl-sidebar-heading"
+            id="fl-sidebar-heading"
+        >
             Chats
         </div>
 
@@ -578,40 +669,105 @@ body:has(.fl-messenger) .footer {
 
         <div class="fl-list">
 
-            <!-- CHATS -->
-            <div class="fl-list-panel" data-panel="chats">
+            <!-- =====================================
+                 CONVERSATIONS
+            ====================================== -->
+
+            <div
+                class="fl-list-panel"
+                data-panel="chats"
+            >
 
                 {% for c in conversations %}
+
                     <a
                         href="{% url 'inbox' %}?chat={{ c.pk }}"
                         class="fl-chat-item {% if active_chat.pk == c.pk %}selected{% endif %}"
                         data-conversation-id="{{ c.pk }}"
                         data-search="{{ c.sender.username }} {{ c.receiver.username }} {{ c.post.caption }}"
                     >
+
+                        <!-- OTHER USER PROFILE PICTURE -->
+
                         <div class="fl-avatar">
+
                             {% if c.sender_id == user.id %}
-                                {{ c.receiver.username|first|upper }}
+
+                                <!-- CURRENT USER IS SENDER -->
+
+                                {% if c.receiver.profile_picture %}
+
+                                    <img
+                                        src="{{ c.receiver.profile_picture.url }}"
+                                        alt="{{ c.receiver.username }}'s profile picture"
+                                        class="fl-avatar-image"
+                                        loading="lazy"
+                                    >
+
+                                {% else %}
+
+                                    {{ c.receiver.username|first|upper }}
+
+                                {% endif %}
+
                             {% else %}
-                                {{ c.sender.username|first|upper }}
+
+                                <!-- CURRENT USER IS RECEIVER -->
+
+                                {% if c.sender.profile_picture %}
+
+                                    <img
+                                        src="{{ c.sender.profile_picture.url }}"
+                                        alt="{{ c.sender.username }}'s profile picture"
+                                        class="fl-avatar-image"
+                                        loading="lazy"
+                                    >
+
+                                {% else %}
+
+                                    {{ c.sender.username|first|upper }}
+
+                                {% endif %}
+
                             {% endif %}
+
                         </div>
 
+
+                        <!-- CONVERSATION INFORMATION -->
+
                         <div class="fl-chat-info">
+
                             <div class="fl-chat-top">
+
                                 <strong>
+
                                     {% if c.sender_id == user.id %}
+
                                         {{ c.receiver.username }}
+
                                     {% else %}
+
                                         {{ c.sender.username }}
+
                                     {% endif %}
+
                                 </strong>
+
                                 <span class="fl-chat-time">
+
                                     {% if c.latest_at %}
+
                                         {{ c.latest_at|date:'H:i' }}
+
                                     {% else %}
+
                                         {{ c.created_at|date:'H:i' }}
+
                                     {% endif %}
+
                                 </span>
+
                             </div>
 
                             <div class="fl-chat-line">
@@ -619,88 +775,168 @@ body:has(.fl-messenger) .footer {
                             </div>
 
                             <div class="fl-chat-sub">
+
                                 {% if c.latest_text %}
+
                                     {{ c.latest_text|truncatechars:45 }}
+
                                 {% elif c.status == 'pending' %}
+
                                     Contact request pending
+
                                 {% else %}
+
                                     {{ c.get_status_display }}
+
                                 {% endif %}
+
                             </div>
+
                         </div>
+
+
+                        <!-- UNREAD BADGE -->
 
                         <span
                             class="fl-badge"
                             data-unread-count
-                            {% if not c.unread_count and not c.status == 'pending' %}hidden{% endif %}
+                            {% if not c.unread_count and c.status != 'pending' %}hidden{% endif %}
                         >
+
                             {% if c.unread_count %}
+
                                 {{ c.unread_count }}
+
                             {% elif c.status == 'pending' and c.receiver_id == user.id %}
+
                                 New
+
                             {% endif %}
+
                         </span>
+
                     </a>
 
                 {% empty %}
+
                     <div class="fl-empty">
                         No conversations yet.
                     </div>
+
                 {% endfor %}
 
             </div>
 
-            <!-- NOTIFICATIONS -->
-            <div class="fl-list-panel" data-panel="notifications" hidden>
+
+            <!-- =====================================
+                 NOTIFICATIONS
+            ====================================== -->
+
+            <div
+                class="fl-list-panel"
+                data-panel="notifications"
+                hidden
+            >
 
                 {% for n in recent_notifications %}
+
                     <div
                         class="fl-activity-item {% if not n.is_read %}unread{% endif %}"
                         data-search="{{ n.message }}"
                     >
-                        <p>{{ n.message }}</p>
-                        <small>{{ n.created_at|date:'M d, H:i' }}</small>
 
-                        {% if n.post %}
-                            <a
-                                class="fl-activity-link"
-                                href="{% url 'post_detail' n.post.pk %}"
-                            >
-                                View related post →
-                            </a>
-                        {% endif %}
+                        <p>{{ n.message }}</p>
+
+                        <small>
+                            {{ n.created_at|date:'M d, H:i' }}
+                        </small>
+
+           
+{% if n.post %}
+
+    {% if n.message|slice:":7" == "REPORT:" and n.post.community.admin_id == user.id %}
+
+        <a
+            class="fl-activity-link"
+            href="{% url 'moderate_post' n.post.pk %}"
+        >
+            Review Report / Manage Post →
+        </a>
+
+    {% else %}
+
+        <a
+            class="fl-activity-link"
+            href="{% url 'post_detail' n.post.pk %}"
+        >
+            View related post →
+        </a>
+
+    {% endif %}
+
+{% endif %}
+
+
                     </div>
+
                 {% empty %}
+
                     <div class="fl-empty">
                         No notifications yet.
                     </div>
+
                 {% endfor %}
 
+
                 <div class="fl-activity-item">
-                    <form method="post" action="{% url 'notifications_mark_read' %}">
+
+                    <form
+                        method="post"
+                        action="{% url 'notifications_mark_read' %}"
+                    >
                         {% csrf_token %}
-                        <button class="button small" type="submit">
+
+                        <button
+                            class="button small"
+                            type="submit"
+                        >
                             Mark all read
                         </button>
+
                     </form>
+
                 </div>
 
             </div>
 
-            <!-- RECENT REQUESTS -->
-            <div class="fl-list-panel" data-panel="requests" hidden>
+
+            <!-- =====================================
+                 RECENT CONTACT REQUESTS
+            ====================================== -->
+
+            <div
+                class="fl-list-panel"
+                data-panel="requests"
+                hidden
+            >
 
                 {% for r in recent_requests %}
+
                     <div
                         class="fl-activity-item"
                         data-search="{{ r.sender.username }} {{ r.receiver.username }} {{ r.post.caption }}"
                     >
+
                         <p>
-                            <strong>{{ r.sender.username }}</strong>
+                            <strong>
+                                {{ r.sender.username }}
+                            </strong>
                             → {{ r.receiver.username }}
                         </p>
 
-                        <p>{{ r.post.caption }}</p>
+                        <p>
+                            {{ r.post.caption }}
+                        </p>
 
                         <small>
                             {{ r.get_status_display }}
@@ -720,22 +956,33 @@ body:has(.fl-messenger) .footer {
                         >
                             View related post →
                         </a>
+
                     </div>
+
                 {% empty %}
+
                     <div class="fl-empty">
                         No contact requests yet.
                     </div>
+
                 {% endfor %}
 
             </div>
 
         </div>
+
     </aside>
 
-    <!-- ACTIVE CHAT -->
+
+    <!-- ==========================================
+         RIGHT ACTIVE CHAT
+    =========================================== -->
+
     <section class="fl-chat-pane">
 
         {% if active_chat %}
+
+            <!-- ACTIVE CHAT HEADER -->
 
             <div class="fl-chat-header">
 
@@ -744,30 +991,84 @@ body:has(.fl-messenger) .footer {
                     class="fl-mobile-back"
                     id="fl-back"
                     aria-label="Back to chats"
-                >←</button>
+                >
+                    ←
+                </button>
+
+
+                <!-- ACTIVE USER PROFILE PICTURE -->
 
                 <div class="fl-avatar">
+
                     {% if active_chat.sender_id == user.id %}
-                        {{ active_chat.receiver.username|first|upper }}
+
+                        <!-- OTHER USER IS RECEIVER -->
+
+                        {% if active_chat.receiver.profile_picture %}
+
+                            <img
+                                src="{{ active_chat.receiver.profile_picture.url }}"
+                                alt="{{ active_chat.receiver.username }}'s profile picture"
+                                class="fl-avatar-image"
+                            >
+
+                        {% else %}
+
+                            {{ active_chat.receiver.username|first|upper }}
+
+                        {% endif %}
+
                     {% else %}
-                        {{ active_chat.sender.username|first|upper }}
+
+                        <!-- OTHER USER IS SENDER -->
+
+                        {% if active_chat.sender.profile_picture %}
+
+                            <img
+                                src="{{ active_chat.sender.profile_picture.url }}"
+                                alt="{{ active_chat.sender.username }}'s profile picture"
+                                class="fl-avatar-image"
+                            >
+
+                        {% else %}
+
+                            {{ active_chat.sender.username|first|upper }}
+
+                        {% endif %}
+
                     {% endif %}
+
                 </div>
 
+
+                <!-- HEADER USERNAME -->
+
                 <div class="fl-chat-header-main">
+
                     <strong>
+
                         {% if active_chat.sender_id == user.id %}
+
                             {{ active_chat.receiver.username }}
+
                         {% else %}
+
                             {{ active_chat.sender.username }}
+
                         {% endif %}
+
                     </strong>
 
                     <small>
+
                         {{ active_chat.post.caption }}
+
                         · {{ active_chat.get_status_display }}
+
                     </small>
+
                 </div>
+
 
                 <a
                     class="fl-chat-header-link"
@@ -775,42 +1076,85 @@ body:has(.fl-messenger) .footer {
                 >
                     View Post
                 </a>
+
             </div>
 
-            <!-- INDEPENDENT MESSAGE SCROLL -->
-            <div class="fl-chat-history" id="fl-chat-history">
+
+            <!-- =====================================
+                 MESSAGE HISTORY
+            ====================================== -->
+
+            <div
+                class="fl-chat-history"
+                id="fl-chat-history"
+            >
+
+                <!-- INITIAL CONTACT REQUEST -->
 
                 <div class="fl-bubble {% if active_chat.sender_id == user.id %}mine{% endif %}">
-                    <strong>Initial Contact Request</strong>
-                    <p>{{ active_chat.answer }}</p>
-                    <small>{{ active_chat.created_at|date:'H:i' }}</small>
+
+                    <strong>
+                        Initial Contact Request
+                    </strong>
+
+                    <p>
+                        {{ active_chat.answer }}
+                    </p>
+
+                    <small>
+                        {{ active_chat.created_at|date:'H:i' }}
+                    </small>
+
                 </div>
 
+
+                <!-- CHAT MESSAGES -->
+
                 {% for m in chat_messages %}
+
                     <div
                         class="fl-bubble {% if m.sender_id == user.id %}mine{% endif %}"
                         data-message-id="{{ m.pk }}"
                     >
-                        <strong>{{ m.sender.username }}</strong>
-                        <p>{{ m.content }}</p>
-                        <small>{{ m.created_at|date:'H:i' }}</small>
+
+                        <strong>
+                            {{ m.sender.username }}
+                        </strong>
+
+                        <p>
+                            {{ m.content }}
+                        </p>
+
+                        <small>
+                            {{ m.created_at|date:'H:i' }}
+                        </small>
+
                     </div>
+
                 {% endfor %}
 
             </div>
 
+
+            <!-- =====================================
+                 PENDING CONTACT REQUEST
+            ====================================== -->
+
             {% if active_chat.status == 'pending' %}
 
                 <div class="fl-locked">
+
                     Messaging is locked until the post owner accepts.
 
                     {% if is_owner %}
+
                         <form
                             class="fl-decision-form"
                             id="fl-decision-form"
                             method="post"
                             action="{% url 'request_decide' active_chat.pk %}"
                         >
+
                             {% csrf_token %}
 
                             <button
@@ -818,17 +1162,27 @@ body:has(.fl-messenger) .footer {
                                 name="decision"
                                 value="approved"
                                 class="fl-approve"
-                            >Accept</button>
+                            >
+                                Accept
+                            </button>
 
                             <button
                                 type="submit"
                                 name="decision"
                                 value="rejected"
                                 class="fl-reject"
-                            >Reject</button>
+                            >
+                                Reject
+                            </button>
+
                         </form>
+
                     {% endif %}
+
                 </div>
+
+
+            <!-- REJECTED CONTACT REQUEST -->
 
             {% elif active_chat.status == 'rejected' %}
 
@@ -836,15 +1190,20 @@ body:has(.fl-messenger) .footer {
                     This contact request was rejected.
                 </div>
 
+
+            <!-- APPROVED CHAT -->
+
             {% elif active_chat.status == 'approved' %}
 
                 <div class="fl-chat-footer">
+
                     <form
                         id="fl-send-form"
                         class="fl-send-form"
                         method="post"
                         action="{% url 'send_message' active_chat.pk %}"
                     >
+
                         {% csrf_token %}
 
                         <textarea
@@ -863,42 +1222,80 @@ body:has(.fl-messenger) .footer {
                         >
                             Send
                         </button>
+
                     </form>
 
                     <small
                         id="fl-send-status"
                         aria-live="polite"
                     ></small>
+
                 </div>
 
             {% endif %}
 
+
         {% else %}
+
             <div class="fl-empty">
                 Select a conversation to start chatting.
             </div>
+
         {% endif %}
 
     </section>
+
 </div>
 
+
+<!-- ==========================================
+     DJANGO DATA FOR JAVASCRIPT
+========================================== -->
+
 {% if active_chat %}
+
     {{ active_chat.pk|json_script:"fl-active-id" }}
+
 {% else %}
-    <script id="fl-active-id" type="application/json">null</script>
+
+    <script
+        id="fl-active-id"
+        type="application/json"
+    >null</script>
+
 {% endif %}
 
 {{ user.pk|json_script:"fl-current-user" }}
 
+
+<!-- ==========================================
+     MESSENGER JAVASCRIPT
+========================================== -->
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+
     "use strict";
 
-    const messenger = document.getElementById("fl-messenger");
-    const sidebarTitle = document.getElementById("fl-sidebar-heading");
-    const searchInput = document.getElementById("fl-search");
-    const tabButtons = document.querySelectorAll(".fl-rail-button[data-tab]");
-    const panels = document.querySelectorAll(".fl-list-panel");
+    const messenger = document.getElementById(
+        "fl-messenger"
+    );
+
+    const sidebarTitle = document.getElementById(
+        "fl-sidebar-heading"
+    );
+
+    const searchInput = document.getElementById(
+        "fl-search"
+    );
+
+    const tabButtons = document.querySelectorAll(
+        ".fl-rail-button[data-tab]"
+    );
+
+    const panels = document.querySelectorAll(
+        ".fl-list-panel"
+    );
 
     const activeId = JSON.parse(
         document.getElementById("fl-active-id").textContent
@@ -908,17 +1305,37 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("fl-current-user").textContent
     );
 
-    const chatHistory = document.getElementById("fl-chat-history");
-    const form = document.getElementById("fl-send-form");
-    const input = document.getElementById("fl-message-input");
-    const sendButton = document.getElementById("fl-send-button");
-    const sendStatus = document.getElementById("fl-send-status");
+    const chatHistory = document.getElementById(
+        "fl-chat-history"
+    );
+
+    const form = document.getElementById(
+        "fl-send-form"
+    );
+
+    const input = document.getElementById(
+        "fl-message-input"
+    );
+
+    const sendButton = document.getElementById(
+        "fl-send-button"
+    );
+
+    const sendStatus = document.getElementById(
+        "fl-send-status"
+    );
 
     const socket = window.liveSocket;
 
-    // Fit below the actual navbar.
+
+    /* ==========================================
+       CALCULATE AVAILABLE HEIGHT
+    =========================================== */
+
     function resizeMessenger() {
+
         const header = document.querySelector(".topbar");
+
         const offset = header
             ? header.getBoundingClientRect().bottom
             : 78;
@@ -930,18 +1347,41 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     resizeMessenger();
-    window.addEventListener("resize", resizeMessenger);
 
-    // Tab switching.
+    window.addEventListener(
+        "resize",
+        resizeMessenger
+    );
+
+
+    /* ==========================================
+       SWITCH INBOX TABS
+    =========================================== */
+
     function switchTab(name) {
+
         tabButtons.forEach(function (button) {
-            const selected = button.dataset.tab === name;
-            button.classList.toggle("active", selected);
-            button.setAttribute("aria-pressed", String(selected));
+
+            const selected =
+                button.dataset.tab === name;
+
+            button.classList.toggle(
+                "active",
+                selected
+            );
+
+            button.setAttribute(
+                "aria-pressed",
+                String(selected)
+            );
+
         });
 
         panels.forEach(function (panel) {
-            panel.hidden = panel.dataset.panel !== name;
+
+            panel.hidden =
+                panel.dataset.panel !== name;
+
         });
 
         const titles = {
@@ -950,106 +1390,204 @@ document.addEventListener("DOMContentLoaded", function () {
             requests: "Recent Requests"
         };
 
-        sidebarTitle.textContent = titles[name] || "Chats";
-        searchInput.value = "";
-        searchInput.placeholder = "Search " +
-            sidebarTitle.textContent.toLowerCase() + "...";
+        sidebarTitle.textContent =
+            titles[name] || "Chats";
 
-        sessionStorage.setItem("fl-active-tab", name);
+        searchInput.value = "";
+
+        searchInput.placeholder =
+            "Search " +
+            sidebarTitle.textContent.toLowerCase() +
+            "...";
+
+        sessionStorage.setItem(
+            "fl-active-tab",
+            name
+        );
+
         filterList();
     }
 
+
+    /* ==========================================
+       SEARCH CONVERSATIONS
+    =========================================== */
+
     function filterList() {
-        const query = searchInput.value.trim().toLowerCase();
+
+        const query = searchInput.value
+            .trim()
+            .toLowerCase();
 
         document.querySelectorAll(
             ".fl-list-panel:not([hidden]) [data-search]"
         ).forEach(function (item) {
+
             item.hidden = !item.dataset.search
                 .toLowerCase()
                 .includes(query);
+
         });
     }
 
+
     tabButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            switchTab(button.dataset.tab);
-        });
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                switchTab(
+                    button.dataset.tab
+                );
+
+            }
+        );
+
     });
 
-    searchInput.addEventListener("input", filterList);
+    searchInput.addEventListener(
+        "input",
+        filterList
+    );
 
-    const savedTab = sessionStorage.getItem("fl-active-tab");
+
+    const savedTab = sessionStorage.getItem(
+        "fl-active-tab"
+    );
 
     switchTab(
-        ["chats", "notifications", "requests"].includes(savedTab)
+        ["chats", "notifications", "requests"].includes(
+            savedTab
+        )
             ? savedTab
             : "chats"
     );
 
-    // Mobile back.
+
+    /* ==========================================
+       MOBILE CHAT
+    =========================================== */
+
     if (
         activeId &&
-        new URLSearchParams(location.search).has("chat")
+        new URLSearchParams(
+            location.search
+        ).has("chat")
     ) {
-        messenger.classList.add("mobile-chat-open");
+
+        messenger.classList.add(
+            "mobile-chat-open"
+        );
+
     }
 
-    document.getElementById("fl-back")?.addEventListener(
+    document.getElementById(
+        "fl-back"
+    )?.addEventListener(
         "click",
         function () {
-            messenger.classList.remove("mobile-chat-open");
+
+            messenger.classList.remove(
+                "mobile-chat-open"
+            );
+
         }
     );
 
+
+    /* ==========================================
+       SCROLL TO LATEST MESSAGE
+    =========================================== */
+
     function scrollBottom() {
+
         if (chatHistory) {
-            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            chatHistory.scrollTop =
+                chatHistory.scrollHeight;
+
         }
     }
 
     scrollBottom();
 
-    // Enter sends, Shift+Enter adds a newline.
-    if (form && input) {
-        input.addEventListener("keydown", function (event) {
-            if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !event.isComposing
-            ) {
-                event.preventDefault();
 
-                if (input.value.trim() && !sendButton.disabled) {
-                    form.requestSubmit();
+    /* ==========================================
+       ENTER TO SEND
+       SHIFT + ENTER FOR NEW LINE
+    =========================================== */
+
+    if (form && input) {
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey &&
+                    !event.isComposing
+                ) {
+
+                    event.preventDefault();
+
+                    if (
+                        input.value.trim() &&
+                        !sendButton.disabled
+                    ) {
+
+                        form.requestSubmit();
+
+                    }
                 }
             }
-        });
+        );
     }
 
-    // Get CSRF from any form or Django's cookie.
+
+    /* ==========================================
+       CSRF TOKEN
+    =========================================== */
+
     function csrfToken() {
+
         const field = document.querySelector(
             'input[name="csrfmiddlewaretoken"]'
         );
 
-        if (field) return field.value;
+        if (field) {
+            return field.value;
+        }
 
         const found = document.cookie.match(
             /(?:^|;\s*)csrftoken=([^;]+)/
         );
 
-        return found ? decodeURIComponent(found[1]) : "";
+        return found
+            ? decodeURIComponent(found[1])
+            : "";
     }
 
-    // Mark active incoming messages as read.
+
+    /* ==========================================
+       MARK MESSAGES AS READ
+    =========================================== */
+
     async function markRead() {
-        if (!activeId || document.hidden) return;
+
+        if (!activeId || document.hidden) {
+            return;
+        }
 
         const token = csrfToken();
-        if (!token) return;
+
+        if (!token) {
+            return;
+        }
 
         try {
+
             const response = await fetch(
                 "{% if active_chat %}{% url 'conversation_mark_read' active_chat.pk %}{% endif %}",
                 {
@@ -1061,21 +1599,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             );
 
-            if (!response.ok) return;
+            if (!response.ok) {
+                return;
+            }
 
             const result = await response.json();
 
             if (result.marked_read > 0) {
+
                 const row = document.querySelector(
-                    '[data-conversation-id="' + activeId + '"]'
+                    '[data-conversation-id="' +
+                    activeId +
+                    '"]'
                 );
 
                 const badge = row?.querySelector(
                     "[data-unread-count]"
                 );
 
-                if (badge && badge.textContent.trim() !== "New") {
+                if (
+                    badge &&
+                    badge.textContent.trim() !== "New"
+                ) {
+
                     badge.hidden = true;
+
                 }
 
                 window.dispatchEvent(
@@ -1086,41 +1634,79 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         } catch (error) {
-            console.error("Mark read failed:", error);
+
+            console.error(
+                "Mark read failed:",
+                error
+            );
+
         }
     }
 
-    // Safely display incoming messages.
-    function appendMessage(data) {
-        if (!chatHistory || !data) return;
 
-        if (Number(data.conversation_id) !== Number(activeId)) {
+    /* ==========================================
+       APPEND REAL-TIME MESSAGE
+    =========================================== */
+
+    function appendMessage(data) {
+
+        if (!chatHistory || !data) {
+            return;
+        }
+
+        if (
+            Number(data.conversation_id) !==
+            Number(activeId)
+        ) {
             return;
         }
 
         const messageId = String(data.id);
 
-        if (chatHistory.querySelector(
-            '[data-message-id="' + messageId + '"]'
-        )) {
+        if (
+            chatHistory.querySelector(
+                '[data-message-id="' +
+                messageId +
+                '"]'
+            )
+        ) {
             return;
         }
 
-        const bubble = document.createElement("div");
-        bubble.className = "fl-bubble";
-        bubble.dataset.messageId = messageId;
+        const bubble = document.createElement(
+            "div"
+        );
 
-        if (Number(data.sender_id) === Number(currentUserId)) {
+        bubble.className = "fl-bubble";
+
+        bubble.dataset.messageId =
+            messageId;
+
+        if (
+            Number(data.sender_id) ===
+            Number(currentUserId)
+        ) {
+
             bubble.classList.add("mine");
+
         }
 
-        const author = document.createElement("strong");
+        const author = document.createElement(
+            "strong"
+        );
+
         author.textContent = data.sender;
 
-        const message = document.createElement("p");
+        const message = document.createElement(
+            "p"
+        );
+
         message.textContent = data.content;
 
-        const time = document.createElement("small");
+        const time = document.createElement(
+            "small"
+        );
+
         time.textContent = new Date(
             data.created_at
         ).toLocaleTimeString([], {
@@ -1128,120 +1714,219 @@ document.addEventListener("DOMContentLoaded", function () {
             minute: "2-digit"
         });
 
-        bubble.append(author, message, time);
+        bubble.append(
+            author,
+            message,
+            time
+        );
+
         chatHistory.appendChild(bubble);
 
+
+        /* UPDATE CONVERSATION PREVIEW */
+
         const preview = document.querySelector(
-            '[data-conversation-id="' + activeId + '"] .fl-chat-sub'
+            '[data-conversation-id="' +
+            activeId +
+            '"] .fl-chat-sub'
         );
 
         if (preview) {
-            preview.textContent = data.content;
+
+            preview.textContent =
+                data.content;
+
         }
 
         scrollBottom();
     }
 
-    // Show pending and new-chat activity by reloading.
+
+    /* ==========================================
+       REFRESH CONVERSATION LIST
+    =========================================== */
+
     function refreshList() {
+
         window.location.reload();
+
     }
+
+
+    /* ==========================================
+       SOCKET.IO EVENTS
+    =========================================== */
 
     if (socket) {
-        socket.on("new_message", async function (data) {
-            const isActive =
-                Number(data.conversation_id) === Number(activeId);
 
-            if (isActive) {
-                appendMessage(data);
+        socket.on(
+            "new_message",
+            async function (data) {
+
+                const isActive =
+                    Number(data.conversation_id) ===
+                    Number(activeId);
+
+                if (isActive) {
+
+                    appendMessage(data);
+
+                    if (
+                        Number(data.sender_id) !==
+                        Number(currentUserId) &&
+                        !document.hidden
+                    ) {
+
+                        await markRead();
+
+                    }
+
+                } else {
+
+                    if (!document.hidden) {
+
+                        refreshList();
+
+                    }
+                }
+
+                await window.refreshInboxBadge?.();
+            }
+        );
+
+
+        socket.on(
+            "contact_request_created",
+            refreshList
+        );
+
+        socket.on(
+            "contact_request_updated",
+            refreshList
+        );
+
+
+        socket.on(
+            "new_notification",
+            function () {
+
+                const selected = document.querySelector(
+                    ".fl-rail-button.active"
+                )?.dataset.tab;
 
                 if (
-                    Number(data.sender_id) !== Number(currentUserId) &&
-                    !document.hidden
+                    selected === "notifications"
                 ) {
-                    await markRead();
-                }
 
-            } else {
-                // Only reload if this tab is visible.
-                // Otherwise refresh when the user returns.
-                if (!document.hidden) {
                     refreshList();
+
                 }
             }
+        );
 
-            await window.refreshInboxBadge?.();
-        });
 
-        socket.on("contact_request_created", refreshList);
-        socket.on("contact_request_updated", refreshList);
+        socket.on(
+            "connect",
+            function () {
 
-        socket.on("new_notification", function () {
-            const selected = document.querySelector(
-                ".fl-rail-button.active"
-            )?.dataset.tab;
+                window.refreshInboxBadge?.();
 
-            if (selected === "notifications") {
-                refreshList();
             }
-        });
+        );
 
-        socket.on("connect", function () {
-            window.refreshInboxBadge?.();
-        });
     }
 
-    // Socket.IO send with normal Django fallback.
+
+    /* ==========================================
+       SEND MESSAGE THROUGH SOCKET.IO
+       DJANGO FORM IS THE FALLBACK
+    =========================================== */
+
     if (form) {
+
         let sending = false;
 
-        form.addEventListener("submit", function (event) {
-            if (!socket || !socket.connected) {
-                return;
-            }
+        form.addEventListener(
+            "submit",
+            function (event) {
 
-            event.preventDefault();
+                if (
+                    !socket ||
+                    !socket.connected
+                ) {
 
-            if (sending) return;
+                    return;
 
-            const content = input.value.trim();
-            if (!content) return;
-
-            sending = true;
-            sendButton.disabled = true;
-            sendStatus.textContent = "Sending...";
-
-            socket.timeout(10000).emit(
-                "send_message",
-                {
-                    conversation_id: activeId,
-                    content: content
-                },
-                function (error, response) {
-                    sending = false;
-                    sendButton.disabled = false;
-
-                    if (error) {
-                        sendStatus.textContent =
-                            "Delivery unconfirmed. Check before retrying.";
-                        return;
-                    }
-
-                    if (!response || !response.success) {
-                        sendStatus.textContent =
-                            response?.error || "Message failed.";
-                        return;
-                    }
-
-                    input.value = "";
-                    input.focus();
-                    sendStatus.textContent = "";
                 }
-            );
-        });
+
+                event.preventDefault();
+
+                if (sending) {
+                    return;
+                }
+
+                const content = input.value.trim();
+
+                if (!content) {
+                    return;
+                }
+
+                sending = true;
+
+                sendButton.disabled = true;
+
+                sendStatus.textContent =
+                    "Sending...";
+
+                socket.timeout(10000).emit(
+                    "send_message",
+                    {
+                        conversation_id: activeId,
+                        content: content
+                    },
+                    function (error, response) {
+
+                        sending = false;
+
+                        sendButton.disabled = false;
+
+                        if (error) {
+
+                            sendStatus.textContent =
+                                "Delivery unconfirmed. Check before retrying.";
+
+                            return;
+                        }
+
+                        if (
+                            !response ||
+                            !response.success
+                        ) {
+
+                            sendStatus.textContent =
+                                response?.error ||
+                                "Message failed.";
+
+                            return;
+                        }
+
+                        input.value = "";
+
+                        input.focus();
+
+                        sendStatus.textContent = "";
+                    }
+                );
+
+            }
+        );
     }
 
-    // Accept/reject without leaving the Inbox.
+
+    /* ==========================================
+       ACCEPT OR REJECT CONTACT REQUEST
+    =========================================== */
+
     const decisionForm = document.getElementById(
         "fl-decision-form"
     );
@@ -1249,80 +1934,116 @@ document.addEventListener("DOMContentLoaded", function () {
     decisionForm?.addEventListener(
         "submit",
         async function (event) {
+
             event.preventDefault();
 
             const data = new FormData(this);
 
             if (event.submitter) {
+
                 data.set(
                     event.submitter.name,
                     event.submitter.value
                 );
+
             }
 
             try {
-                const response = await fetch(this.action, {
-                    method: "POST",
-                    body: data,
-                    credentials: "same-origin"
-                });
+
+                const response = await fetch(
+                    this.action,
+                    {
+                        method: "POST",
+                        body: data,
+                        credentials: "same-origin"
+                    }
+                );
 
                 if (!response.ok) {
-                    alert("Could not update the request.");
+
+                    alert(
+                        "Could not update the request."
+                    );
+
                     return;
                 }
 
                 refreshList();
 
             } catch (error) {
-                alert("Network error. Please try again.");
+
+                alert(
+                    "Network error. Please try again."
+                );
+
             }
         }
     );
+
+
+    /* ==========================================
+       REFRESH UNREAD COUNTS ON RETURN
+    =========================================== */
 
     document.addEventListener(
         "visibilitychange",
         function () {
+
             if (!document.hidden) {
+
                 window.refreshInboxBadge?.();
+
                 markRead();
+
             }
         }
     );
-    
-// Synchronize unread count when a chat opens.
-async function synchronizeOpenedChat() {
 
-    const params = new URLSearchParams(
-        window.location.search
-    );
 
-    if (!params.has("chat")) {
-        return;
+    /* ==========================================
+       SYNCHRONIZE OPENED CHAT BADGE
+    =========================================== */
+
+    async function synchronizeOpenedChat() {
+
+        const params = new URLSearchParams(
+            window.location.search
+        );
+
+        if (!params.has("chat")) {
+            return;
+        }
+
+        if (
+            typeof window.refreshInboxBadge ===
+            "function"
+        ) {
+
+            await window.refreshInboxBadge();
+
+        }
+
+        const openedRow = document.querySelector(
+            '[data-conversation-id="' +
+            activeId +
+            '"]'
+        );
+
+        const unreadBadge = openedRow?.querySelector(
+            "[data-unread-count]"
+        );
+
+        if (
+            unreadBadge &&
+            unreadBadge.textContent.trim() !== "New"
+        ) {
+
+            unreadBadge.hidden = true;
+
+        }
     }
 
-    // Django has already marked messages as read
-    // when rendering this selected conversation.
-    if (typeof window.refreshInboxBadge === "function") {
-        await window.refreshInboxBadge();
-    }
-
-    // Update the visible conversation badge.
-    const openedRow = document.querySelector(
-        '[data-conversation-id="' + activeId + '"]'
-    );
-
-    const unreadBadge = openedRow?.querySelector(
-        "[data-unread-count]"
-    );
-
-    if (unreadBadge && unreadBadge.textContent.trim() !== "New") {
-        unreadBadge.hidden = true;
-    }
-}
-
-synchronizeOpenedChat();
-
+    synchronizeOpenedChat();
 
 });
 </script>

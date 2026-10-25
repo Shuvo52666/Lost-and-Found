@@ -1,0 +1,144 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.manage-page {
+    max-width: 950px;
+    margin: 25px auto 60px;
+}
+
+.manage-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.manage-heading h1 {
+    color: #142b34;
+    margin-bottom: 5px;
+}
+
+.manage-heading p {
+    color: #64748b;
+}
+
+.manage-post {
+    background: white;
+    border: 1px solid #dfe9e7;
+    border-radius: 13px;
+    padding: 20px;
+    margin-bottom: 14px;
+}
+
+.manage-post h3 {
+    margin: 0 0 8px;
+    color: #142b34;
+}
+
+.manage-post p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.manage-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.manage-link {
+    display: inline-block;
+    background: #edf7f1;
+    color: #087f66;
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.report-count {
+    color: #b45309;
+    font-size: 13px;
+    font-weight: 700;
+}
+</style>
+
+<div class="manage-page">
+
+    <div class="manage-heading">
+
+        <div>
+            <h1>Manage Posts</h1>
+            <p>{{ community.name }} Community</p>
+        </div>
+
+        <a href="{% url 'feed' %}" class="button">
+            Back to Feed
+        </a>
+
+    </div>
+
+    {% for post in posts %}
+
+        <div class="manage-post">
+
+            <h3>{{ post.caption }}</h3>
+
+            <p>
+                Posted by @{{ post.user.username }}
+                · {{ post.created_at|date:"M d, Y" }}
+            </p>
+
+            <p>
+                {{ post.get_type_display }}
+                · {{ post.get_status_display }}
+            </p>
+
+            {% if post.report_count %}
+
+                <p class="report-count">
+                    {{ post.report_count }} report(s)
+                    submitted
+                </p>
+
+            {% endif %}
+
+            <div class="manage-actions">
+
+                <a
+                    href="{% url 'moderate_post' post.pk %}"
+                    class="manage-link"
+                >
+                    Review / Manage
+                </a>
+
+                <a
+                    href="{% url 'post_detail' post.pk %}"
+                    class="manage-link"
+                >
+                    View Post
+                </a>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="manage-post">
+            No posts found in this community.
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

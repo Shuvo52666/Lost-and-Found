@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
-        {% block title %}Lost & Found{% endblock %} · FindLoop
+        {% block title %}Lost & Found{% endblock %} · LOST & FOUND
     </title>
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -22,7 +22,7 @@
         <div class="container nav">
 
             <a class="brand" href="{% url 'home' %}">
-                ✦ <span>FindLoop</span>
+                <span>LOST & FOUND</span>
             </a>
 
             
@@ -30,9 +30,7 @@
 
                 {% if user.is_authenticated %}
 
-                    <a href="{% url 'feed' %}">
-                        Feed
-                    </a>
+                    <a href="{% url 'feed' %}">Feed</a>
 
                     <a href="{% url 'community_list' %}">
                         Communities
@@ -53,9 +51,23 @@
                     </a>
 
 
-                    <span class="hello">
-                        {{ user.username }}
-                    </span>
+                    
+                    <a href="{% url 'profile' %}" class="nav-profile">
+                       
+                        <span class="nav-profile-avatar">
+                            {% if user.profile_picture %}
+                                <img
+                                    src="{{ user.profile_picture.url }}"
+                                    alt=""
+                                    class="nav-profile-image"
+                                >
+                            {% else %}
+                                {{ user.username|first|upper }}
+                            {% endif %}
+                        </span>
+
+                    </a>
+
 
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
@@ -96,9 +108,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        FindLoop · A community-based lost & found project
-    </footer>
+
 
     <!-- Socket.IO Connection -->
 

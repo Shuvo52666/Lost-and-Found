@@ -33,18 +33,25 @@ def user_conversations(user):
 # MESSENGER STYLE INBOX
 # =========================================
 
+
 @login_required
 def inbox(request):
     user = request.user
 
-    # Find the latest message in each conversation.
+    # =========================================
+    # 1. LATEST MESSAGE FOR EACH CONVERSATION
+    # =========================================
+
     latest_message = (
         Message.objects
         .filter(request_id=OuterRef("pk"))
         .order_by("-created_at", "-pk")
     )
 
-    # Get all conversations for the current user.
+    # =========================================
+    # 2. ALL USER CONVERSATIONS
+    # =========================================
+
     conversations = (
         user_conversations(user)
         .select_related(
@@ -70,7 +77,10 @@ def inbox(request):
         .order_by("-created_at", "-pk")
     )
 
-    # Notification history
+    # =========================================
+    # 3. NOTIFICATION HISTORY
+    # =========================================
+
     recent_notifications = (
         Notification.objects
         .filter(user=user)
@@ -78,7 +88,10 @@ def inbox(request):
         .order_by("-created_at")[:20]
     )
 
-    # Recent requests, both sent and received.
+    # =========================================
+    # 4. RECENT CONTACT REQUESTS
+    # =========================================
+
     recent_requests = (
         user_conversations(user)
         .select_related(
@@ -89,13 +102,18 @@ def inbox(request):
         .order_by("-created_at")[:20]
     )
 
-    # Currently selected conversation.
-    active_chat = None
-    chat_messages = []
+    # =========================================
+    # 5. SELECT ACTIVE CONVERSATION
+    # =========================================
 
     chat_id = request.GET.get("chat")
 
+    active_chat = None
+    chat_messages = []
+
     if chat_id:
+
+        # Only participants can open this conversation.
         active_chat = get_object_or_404(
             user_conversations(user).select_related(
                 "post",
@@ -104,51 +122,54 @@ def inbox(request):
             ),
             pk=chat_id
         )
+
     else:
+
+        # Default to the most recent conversation.
         active_chat = conversations.first()
 
-    
+    # =========================================
+    # 6. LOAD CHAT MESSAGES
+    # =========================================
+
     if active_chat:
 
-        # Mark messages as read only when the user
-        # explicitly opens a conversation.
+        # Mark as read only when the chat is
+        # explicitly selected using ?chat=ID.
         if chat_id:
+
             Message.objects.filter(
                 request=active_chat,
                 receiver=user,
                 is_read=False
-            ).update(is_read=True)
+            ).update(
+                is_read=True
+            )
 
-        # Load messages in chronological order.
+        # Chronological message history.
         chat_messages = (
             active_chat.messages
             .select_related("sender", "receiver")
             .order_by("created_at", "pk")
         )
 
-        # Refresh conversation unread counters.
-        conversations = list(conversations)
+    # =========================================
+    # 7. UPDATE UNREAD COUNTS IN SIDEBAR
+    # =========================================
 
-        if chat_id:
-            for item in conversations:
-                if item.pk == active_chat.pk:
-                    item.unread_count = 0
+    conversations = list(conversations)
 
-
-        # Refresh current chat's unread count
-        # for the left-side conversation list.
-        conversations = list(conversations)
+    if active_chat and chat_id:
 
         for item in conversations:
+
             if item.pk == active_chat.pk:
                 item.unread_count = 0
+                break
 
-        # Get messages in chronological order.
-        chat_messages = (
-            active_chat.messages
-            .select_related("sender", "receiver")
-            .order_by("created_at", "pk")
-        )
+    # =========================================
+    # 8. RENDER MAIN INBOX
+    # =========================================
 
     return render(
         request,
@@ -165,6 +186,7 @@ def inbox(request):
             ),
         }
     )
+
 
 
 # =========================================
