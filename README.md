@@ -1,66 +1,306 @@
-# FindLoop — Community Lost & Found (Django)
+# FindLoop — Community Lost & Found Platform
 
-A community-based Lost & Found web app based on the project proposal. Django templates, SQLite (local), Pillow image uploads, QR invite codes, moderated contact requests, approved messaging, and in-app notifications.
+**FindLoop** is a community-based lost-and-found web application built with **Django**. It helps people report missing belongings, share found items, search posts within their communities, and contact post owners through an organized messaging workflow.
 
-## Requirements
-- Python 3.10+ (prefer Python 3.12 or 3.13)
-- pip, Git
+The platform brings together community-specific feeds, optional ownership-verification questions, contact requests, notifications, and moderation tools to make recovering lost items easier and safer.
 
-## Quick start — macOS / Linux
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-cp .env.example .env
-# Edit .env: set DJANGO_SECRET_KEY to a random secret
-python manage.py makemigrations accounts communities newsfeed verification messaging notifications
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+> **Project status:** Academic/team project under active development. Some integrations and features may differ between branches. This README describes the current project design and known workflows; verify implementation details against your checked-out code.
+
+## Features
+
+### Accounts and profiles
+- User registration and login.
+- User profiles, including profile pictures where available.
+- Authenticated access to posting and contact-related functionality.
+
+### Communities
+- Community-based organization of lost-and-found posts.
+- Join or access communities using the application's membership workflow.
+- Community profile with description, member count, and administrator information.
+- Community administrators can access post management tools.
+
+### Lost-and-found feed
+- Publish **Lost** or **Found** posts with a caption, description, and optional image.
+- Browse posts in a scrollable, social-style community feed.
+- Search posts by keyword and filter by **Lost** or **Found**.
+- See post status, author, community, and relative posting time.
+- Expand/collapse comments and write new comments directly from the feed.
+- Message a post owner or report an inappropriate post.
+
+### Ownership verification and contact requests
+- Add optional verification questions when creating a post.
+- A person contacting the post owner can provide answers before proceeding to conversation.
+- Answers are submitted as part of the initial contact-request workflow.
+- Contact requests can require acceptance by the owner before unrestricted conversation.
+
+### Messaging and notifications
+- Inbox interface for contact requests and conversations.
+- Unread-message and recent-request notifications.
+- A notification flow for community reports and administration.
+
+> Real-time message delivery / Socket.IO behavior is an area of development. Do not assume it is configured in every version of the repository.
+
+### Reports and moderation
+- Users can report posts created by other users.
+- Community administrators can review/manage posts in their community.
+- Moderation pages are intended to be restricted on the **server side**, not just by hidden buttons in the interface.
+
+## Technology stack
+
+| Layer | Technology |
+| --- | --- |
+| Backend | Python, Django 5.2.x |
+| Frontend | Django templates, HTML, CSS, JavaScript |
+| Database | Configured through Django settings (check your local `settings.py`) |
+| Image uploads | Django media storage; Pillow may be required |
+| Development | Git, GitHub, Python virtual environment |
+
+## Project structure
+
+The main application areas are organized approximately as follows (files can vary by branch):
+
+```text
+Lost-and-Found/
+├── manage.py
+├── config/                 # Django project settings and ASGI/WSGI configuration
+├── accounts/               # Authentication and user profiles
+├── communities/            # Communities, memberships, and administrators
+├── newsfeed/               # Lost/found posts, comments, reports, moderation
+├── verification/           # Verification questions and answers
+├── messaging/              # Contact requests and conversations
+├── notifications/          # User and administrator notifications
+├── templates/              # Shared and app-specific HTML templates
+│   ├── base.html
+│   └── newsfeed/
+│       ├── feed.html
+│       └── moderate_post.html
+├── static/                 # CSS, images, and other static assets
+├── media/                  # Uploaded content (development; usually ignored by Git)
+├── tests/                  # Tests, when present
+└── requirements.txt        # Dependencies, when included
 ```
 
-## Quick start — Windows PowerShell
+## Getting started
+
+### Prerequisites
+- Python version supported by your installed Django and dependencies.
+- Git.
+- A database supported by your project configuration.
+
+### 1. Clone the repository
+
+```bash
+git clone <YOUR_REPOSITORY_URL>
+cd Lost-and-Found
+```
+
+Replace `<YOUR_REPOSITORY_URL>` with your actual GitHub repository link and use the directory name created by cloning.
+
+### 2. Create and activate a virtual environment
+
+**Windows (PowerShell):**
+
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+If the repository includes `requirements.txt`:
+
+```bash
 python -m pip install -r requirements.txt
-Copy-Item .env.example .env
-# Edit .env and set DJANGO_SECRET_KEY
-python manage.py makemigrations accounts communities newsfeed verification messaging notifications
+```
+
+If that file is not yet available, install the project's actual dependencies before proceeding. **Do not assume Django alone is enough** if this version uses image processing, ASGI, channels, or other integrations.
+
+### 4. Configure your environment
+
+Review `config/settings.py` for required configuration, especially:
+
+- `SECRET_KEY` / environment-based secrets.
+- `DEBUG` and `ALLOWED_HOSTS`.
+- `DATABASES` and any database credentials.
+- `INSTALLED_APPS`, `TEMPLATES`, and static/media paths.
+- Email, notifications, and any real-time messaging configuration, where used.
+
+Store credentials in environment variables or another excluded local configuration file. **Never commit real secret keys, passwords, tokens, or production `.env` files.**
+
+### 5. Apply database migrations
+
+```bash
 python manage.py migrate
-python manage.py createsuperuser
+```
+
+If you have modified models locally and need new migration files, run `python manage.py makemigrations` first. In a cloned project with committed migrations, `migrate` is usually sufficient.
+
+### 6. Run the development server
+
+```bash
 python manage.py runserver
 ```
-If PowerShell blocks activation, open Command Prompt and run `.venv\Scripts\activate.bat` instead.
 
-Visit http://127.0.0.1:8000/ and log into /admin/ using your superuser account.
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser. The root page or redirect depends on your URL configuration.
 
-**Before your first migration**, keep `AUTH_USER_MODEL='accounts.User'`. After running `makemigrations` on the shared project, **commit the generated migration files to Git**. Other team members should run `migrate` only after pulling the committed migrations.
+If your branch explicitly uses ASGI/real-time messaging, follow its ASGI server instructions instead of assuming Django's development server provides the intended real-time behavior.
 
-## Test
-```bash
-python manage.py check
-python manage.py test
+## How the application works
+
+### Post a lost or found item
+1. Sign in and open a community you belong to.
+2. Select **Create Post**.
+3. Choose **Lost** or **Found** and enter the item information.
+4. Upload an image if desired.
+5. Optionally add verification questions, then publish.
+
+### Search and interact with posts
+1. Open the community feed.
+2. Use search and the Lost/Found filter.
+3. Expand **Comments** to read or write comments.
+4. Use **Message** to begin the contact-request flow for another user's eligible post.
+5. Use **Report** to flag an inappropriate post.
+
+### Contact and verification workflow
+
+```text
+User discovers a post
+        |
+        v
+Chooses Message / Contact
+        |
+        v
+Answers optional verification questions
+        |
+        v
+Contact request reaches the post owner
+        |
+        v
+Owner reviews and accepts the request
+        |
+        v
+Conversation can continue
 ```
 
-## Demo walkthrough
-1. Sign up as person A, create a community, share its community ID or QR invite.
-2. Sign up as person B in a different browser/incognito window, join the community.
-3. Person A creates a found-item post and optionally adds verification questions.
-4. Person B opens the post and submits a contact request with private ownership details.
-5. Person A reviews and approves the request at **Requests**.
-6. Both can now talk via **Inbox**. Notifications appear in **Alerts**.
-7. Person A marks the post as **Returned** once the item is returned.
+### Community moderation workflow
 
-## Team conventions
-- `main` stays stable; each task gets a `feature/...` branch.
-- Create Pull Requests, have another team member review, then merge.
-- Never commit `.env`, `db.sqlite3`, `media/`, or `.venv/`.
-- Commit `requirements.txt` and **generated migrations**.
-- One member should coordinate changes to `models.py` and migrations during integration.
+```text
+User reports a post
+        |
+        v
+Community administrator receives/reviews the report
+        |
+        v
+Administrator opens post-management or moderation view
+        |
+        v
+Administrator decides the appropriate action
+```
 
-## Known limitations / next improvements
-This is a **local demo/MVP**, not a production-hardened release. No email verification, password reset, anti-spam/rate limiting, audit logging, media moderation, multi-image uploads, moderation dashboard, real-time WebSockets, or mobile app. Invitations by code/QR allow anyone holding the code to join. Verification is **manual review by the poster**, not automated proof of ownership. QR code redirects to a join confirmation route; share codes carefully. Messages refresh when the page reloads. There is no integrated object storage or production PostgreSQL configuration. The in-app UI uses the project name **FindLoop** as a replaceable brand. Uploaded media is served by Django *only in DEBUG mode*, not by WhiteNoise.
+Administrative permissions must be enforced in Django views, even if UI controls are visible only to an administrator.
 
-### Deployment checklist (additional work required)
-Use PostgreSQL, protected object storage for user media, HTTPS, a strong secret, trusted CSRF origins, email authentication flows, secure logging, access control review, backups, admin moderation procedures, and deployment smoke tests. Set `DJANGO_DEBUG=False` in production. This starter uses SQLite by default, so do **not** directly deploy it as a public production service without configuring a hosted DB/media storage.
+## Main Django apps
+
+| App | Responsibility |
+| --- | --- |
+| `accounts` | Users, authentication, profiles |
+| `communities` | Communities, memberships, administrators |
+| `newsfeed` | Posts, search/filter, comments, reports, post moderation |
+| `verification` | Optional post ownership-verification questions and answers |
+| `messaging` | Contact requests, inbox, conversations |
+| `notifications` | Unread messages, request activity, report notices |
+
+## Common development commands
+
+```bash
+# Check project configuration
+python manage.py check
+
+# Create migration files after model changes
+python manage.py makemigrations
+
+# Apply migrations
+python manage.py migrate
+
+# Run tests
+python manage.py test
+
+# Start local server
+python manage.py runserver
+```
+
+## Troubleshooting
+
+**`TemplateDoesNotExist: newsfeed/moderate_post.html`**  
+Ensure the moderation template exists at `templates/newsfeed/moderate_post.html` and that the Django `TEMPLATES` setting includes the project's template directory. The view must also render the correct template path.
+
+**Uploaded images do not appear**  
+Check `MEDIA_URL`, `MEDIA_ROOT`, image fields, and development-only media URL routing. Ensure the configured file storage backend is valid.
+
+**`InvalidStorageError` during post creation**  
+Check the `STORAGES` configuration and Django version-specific settings. Do not remove necessary storage backends.
+
+**ASGI server fails because `SECRET_KEY` is missing**  
+Configure the expected environment variable before launching the ASGI application.
+
+**Template syntax errors**  
+Check Django template tags and matching `{% if %}` / `{% endif %}` blocks. Django templates do not use Python syntax everywhere.
+
+## Security considerations
+
+- Require authentication for protected actions.
+- Confirm community membership where required.
+- Validate post ownership and community-admin status **inside views**.
+- Use CSRF protection on forms that change data.
+- Validate uploaded files and limit upload sizes as needed.
+- Avoid exposing verification answers or sensitive conversation information to unauthorized users.
+- Keep production secrets out of version control.
+- Set `DEBUG = False` and configure hosts, HTTPS, static/media handling, and a production-ready database before deployment.
+
+## Team and contribution workflow
+
+This project is developed by a **three-member team**.
+
+A simple workflow for contributors:
+
+1. Pull the latest changes before starting work.
+2. Create a branch for the feature or fix.
+3. Make focused commits with clear messages.
+4. Run checks and tests for the changed parts.
+5. Open a pull request or coordinate merging with the team.
+
+Example commit messages:
+
+```text
+feat(newsfeed): add community lost and found filters
+feat(messaging): add contact request approval flow
+feat(verification): add optional verification questions
+feat(notifications): show unread requests in inbox
+fix(newsfeed): align post actions in one row
+fix(moderation): restrict moderation to community admin
+```
+
+## Future improvements
+
+Potential enhancements (not a claim that these are already implemented):
+
+- Reliable real-time messaging and notifications.
+- Better filtering, pagination, and image optimization.
+- More comprehensive automated tests.
+- Accessibility and mobile UI refinements.
+- Deployment and CI/CD configuration.
+
+## License
+
+No license is specified in this README. Add a `LICENSE` file if your team decides to grant permissions for reuse or redistribution.
+
+---
+
+**FindLoop — Connecting communities to reunite people with their belongings.**
