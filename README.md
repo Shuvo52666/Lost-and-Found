@@ -145,7 +145,7 @@ If you have modified models locally and need new migration files, run `python ma
 ### 6. Run the development server
 
 ```bash
-python manage.py runserver
+python -m uvicorn config.asgi:application --reload
 ```
 
 Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser. The root page or redirect depends on your URL configuration.
