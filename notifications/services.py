@@ -1,15 +1,16 @@
 
-from django.db import transaction
 
+from django.db import transaction
 from .models import Notification
 
 
-def notify(user, message, post=None):
+def notify(user, message, post=None, contact_request=None):
 
     notification = Notification.objects.create(
         user=user,
         message=message,
-        post=post
+        post=post,
+        contact_request=contact_request
     )
 
     def send_realtime():
@@ -27,9 +28,8 @@ def notify(user, message, post=None):
                 "message": notification.message,
                 "unread_count": unread_count,
                 "post_id": notification.post_id,
-                "created_at": (
-                    notification.created_at.isoformat()
-                ),
+                "contact_request_id": notification.contact_request_id,
+                "created_at": notification.created_at.isoformat(),
             },
             user.pk
         )

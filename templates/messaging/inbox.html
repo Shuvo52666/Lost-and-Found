@@ -560,6 +560,69 @@ body:has(.fl-messenger) .footer {
         font-size: 22px;
     }
 }
+/* FULL-WIDTH NOTIFICATIONS VIEW */
+
+.fl-messenger.notifications-view {
+    display: block;
+    overflow-y: auto;
+    background: #ffffff;
+}
+
+.fl-messenger.notifications-view .fl-rail,
+.fl-messenger.notifications-view .fl-chat-pane,
+.fl-messenger.notifications-view .fl-search-wrap {
+    display: none !important;
+}
+
+.fl-messenger.notifications-view .fl-sidebar {
+    width: 100%;
+    height: 100%;
+    border-right: none;
+    overflow-y: auto;
+}
+
+.fl-messenger.notifications-view .fl-sidebar-heading {
+    padding: 28px 32px 20px;
+    font-size: 26px;
+}
+
+.fl-messenger.notifications-view .fl-list {
+    overflow-y: visible;
+}
+
+.fl-messenger.notifications-view
+.fl-list-panel[data-panel="notifications"] {
+    width: 100%;
+}
+
+.fl-messenger.notifications-view
+.fl-list-panel[data-panel="notifications"]
+.fl-activity-item {
+    padding: 20px 32px;
+    border-bottom: 1px solid #e5e7eb;
+    box-sizing: border-box;
+}
+
+.fl-messenger.notifications-view
+.fl-list-panel[data-panel="notifications"]
+.fl-activity-item p {
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+}
+
+.fl-messenger.notifications-view
+.fl-list-panel[data-panel="notifications"]
+.fl-activity-link {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.fl-messenger.notifications-view
+.fl-list-panel[data-panel="notifications"]
+.fl-empty {
+    padding: 40px 32px;
+    text-align: center;
+}
 </style>
 
 
@@ -595,29 +658,7 @@ body:has(.fl-messenger) .footer {
             </span>
         </button>
 
-        <!-- NOTIFICATIONS -->
-
-        <button
-            type="button"
-            class="fl-rail-button"
-            data-tab="notifications"
-            aria-label="Notifications"
-            title="Notifications"
-        >
-            <svg viewBox="0 0 24 24">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
-                <path d="M10 21h4"/>
-            </svg>
-
-            <span
-                id="fl-notifications-count"
-                class="fl-rail-count"
-                {% if not unread_notification_count %}hidden{% endif %}
-            >
-                {{ unread_notification_count|default:0 }}
-            </span>
-        </button>
-
+       
         <!-- RECENT REQUESTS -->
 
         <button
@@ -852,7 +893,16 @@ body:has(.fl-messenger) .footer {
                         </small>
 
            
-{% if n.post %}
+{% if n.contact_request %}
+
+    <a
+        class="fl-activity-link"
+        href="{% url 'inbox' %}?chat={{ n.contact_request.pk }}"
+    >
+        Open Contact Request →
+    </a>
+
+{% elif n.post %}
 
     {% if n.message|slice:":7" == "REPORT:" and n.post.community.admin_id == user.id %}
 
@@ -1392,6 +1442,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sidebarTitle.textContent =
             titles[name] || "Chats";
+        // Use a full-width layout only for Notifications.
+        messenger.classList.toggle(
+            "notifications-view",
+            name === "notifications"
+        );    
 
         searchInput.value = "";
 
@@ -1452,17 +1507,34 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
 
-    const savedTab = sessionStorage.getItem(
-        "fl-active-tab"
-    );
+const urlParams = new URLSearchParams(
+    window.location.search
+);
 
-    switchTab(
-        ["chats", "notifications", "requests"].includes(
-            savedTab
-        )
-            ? savedTab
-            : "chats"
-    );
+const requestedTab = urlParams.get("tab");
+
+const savedTab = sessionStorage.getItem(
+    "fl-active-tab"
+);
+
+const validTabs = [
+    "chats",
+    "notifications",
+    "requests"
+];
+
+if (urlParams.has("chat")) {
+    switchTab("chats");
+} else if (validTabs.includes(requestedTab)) {
+    switchTab(requestedTab);
+} else if (
+    savedTab === "chats" ||
+    savedTab === "requests"
+) {
+    switchTab(savedTab);
+} else {
+    switchTab("chats");
+}
 
 
     /* ==========================================
@@ -1757,84 +1829,121 @@ document.addEventListener("DOMContentLoaded", function () {
        SOCKET.IO EVENTS
     =========================================== */
 
-    if (socket) {
+    
+/* ==========================================
+   SOCKET.IO EVENTS
+========================================== */
 
-        socket.on(
-            "new_message",
-            async function (data) {
+            if (socket) {
 
-                const isActive =
-                    Number(data.conversation_id) ===
-                    Number(activeId);
+                // SOCKET CONNECTED
+                socket.on("connect", function () {
+                    console.log(
+                        "Messaging Socket.IO connected:",
+                        socket.id
+                    );
 
-                if (isActive) {
+                    window.refreshInboxBadge?.();
+                });
 
-                    appendMessage(data);
+                // SOCKET DISCONNECTED
+                socket.on("disconnect", function (reason) {
+                    console.warn(
+                        "Messaging Socket.IO disconnected:",
+                        reason
+                    );
+                });
 
-                    if (
-                        Number(data.sender_id) !==
-                        Number(currentUserId) &&
-                        !document.hidden
-                    ) {
+                // REAL-TIME MESSAGING
+                socket.on("new_message", async function (data) {
 
-                        await markRead();
+                    console.log("New message:", data);
+
+                    const isActive =
+                        Number(data.conversation_id) ===
+                        Number(activeId);
+
+                    if (isActive) {
+
+                        // Display new message without reloading.
+                        appendMessage(data);
+
+                        // Automatically mark incoming messages as read
+                        // when the user is viewing this conversation.
+                        if (
+                            Number(data.sender_id) !==
+                            Number(currentUserId) &&
+                            !document.hidden
+                        ) {
+                            await markRead();
+                        }
+
+                    } else {
+
+                        // Refresh conversation list for other chats.
+                        if (!document.hidden) {
+                            refreshList();
+                        }
 
                     }
 
-                } else {
+                    window.refreshInboxBadge?.();
+                });
 
-                    if (!document.hidden) {
-
-                        refreshList();
-
-                    }
-                }
-
-                await window.refreshInboxBadge?.();
-            }
-        );
-
-
-        socket.on(
-            "contact_request_created",
-            refreshList
-        );
-
-        socket.on(
-            "contact_request_updated",
-            refreshList
-        );
-
-
-        socket.on(
-            "new_notification",
-            function () {
-
-                const selected = document.querySelector(
-                    ".fl-rail-button.active"
-                )?.dataset.tab;
-
-                if (
-                    selected === "notifications"
-                ) {
-
+                // NEW CONTACT REQUEST
+                socket.on("contact_request_created", function () {
                     refreshList();
+                    window.refreshInboxBadge?.();
+                });
 
+                // CONTACT REQUEST APPROVED OR REJECTED
+                socket.on("contact_request_updated", function () {
+                    refreshList();
+                    window.refreshInboxBadge?.();
+                });
+
+                // NEW NOTIFICATION
+                socket.on("new_notification", function () {
+
+                    window.refreshInboxBadge?.();
+
+                    // Reload only when Notifications is open.
+                    const urlParams = new URLSearchParams(
+                        window.location.search
+                    );
+
+                    const requestedTab = urlParams.get("tab");
+
+                    const notificationsPanel = document.querySelector(
+                        '.fl-list-panel[data-panel="notifications"]'
+                    );
+
+                    const notificationsOpen =
+                        requestedTab === "notifications" ||
+                        (
+                            notificationsPanel &&
+                            !notificationsPanel.hidden
+                        );
+
+                    if (notificationsOpen) {
+                        window.location.reload();
+                    }
+                });
+
+                // NOTIFICATIONS MARKED AS READ
+                socket.on("notifications_read", function () {
+                    window.refreshInboxBadge?.();
+                });
+
+                // EXISTING CONNECTION
+                if (socket.connected) {
+                    console.log(
+                        "Messaging socket already connected:",
+                        socket.id
+                    );
                 }
             }
-        );
 
-
-        socket.on(
-            "connect",
-            function () {
-
-                window.refreshInboxBadge?.();
-
-            }
-        );
-
-    }
 
 
     /* ==========================================

@@ -296,6 +296,7 @@ def status(request,pk):
 # REPORT A POST
 # ==========================================
 
+
 @login_required
 def report_post(request, post_id):
     post = get_object_or_404(
@@ -306,11 +307,22 @@ def report_post(request, post_id):
         pk=post_id
     )
 
-    # The post author cannot report their own post
+    # The post author cannot report their own post.
     if post.user_id == request.user.id:
         messages.error(
             request,
             "You cannot report your own post."
+        )
+        return redirect("post_detail", pk=post.pk)
+
+    # Prevent the same user from reporting twice.
+    if Report.objects.filter(
+        user=request.user,
+        post=post
+    ).exists():
+        messages.warning(
+            request,
+            "You have already reported this post."
         )
         return redirect("post_detail", pk=post.pk)
 
@@ -319,29 +331,36 @@ def report_post(request, post_id):
 
         if form.is_valid():
             report = form.save(commit=False)
-
             report.post = post
+            report.user = request.user
 
-            # Support common reporter field names
-            if hasattr(report, "reporter_id"):
-                report.reporter = request.user
-            elif hasattr(report, "user_id"):
-                report.user = request.user
-            else:
-                raise ValueError(
-                    "Report model needs a reporter or user field."
-                )
-
-            report.save()
-
-            # Notify the admin of the post's community
-            Notification.objects.create(
-                user=post.community.admin,
+            # Save report only if it does not already exist.
+            # get_or_create also handles concurrent submissions.
+            saved_report, created = Report.objects.get_or_create(
+                user=request.user,
                 post=post,
-                message=(
+                defaults={
+                    "reason": report.reason,
+                    "description": report.description
+                }
+            )
+
+            if not created:
+                messages.warning(
+                    request,
+                    "You have already reported this post."
+                )
+                return redirect("post_detail", pk=post.pk)
+
+            # Notify only the community admin.
+            # Use the existing notification service for Socket.IO.
+            notify(
+                post.community.admin,
+                (
                     f"REPORT: {request.user.username} "
                     f"reported the post '{post.caption}'."
-                )
+                ),
+                post=post
             )
 
             messages.success(
@@ -365,6 +384,7 @@ def report_post(request, post_id):
             "form": form
         }
     )
+
 
 
 # ==========================================

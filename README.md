@@ -105,7 +105,7 @@ Run these commands from the project folder (the same folder as `manage.py`):
 py -m venv .venv
 
 # Activate virtual environment
-.\.venv\Scripts\Activate.ps1
+source .venv/Scripts/activate
 
 # Install dependencies
 python -m pip install -r requirements.txt

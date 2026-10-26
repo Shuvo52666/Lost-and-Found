@@ -38,6 +38,7 @@
 
                     <!-- Inbox with unread badge -->
                     
+                    <!-- Inbox with unread badge -->
                     <a href="{% url 'inbox' %}">
                         Inbox
 
@@ -47,6 +48,36 @@
                             {% if inbox_badge_count == 0 %}hidden{% endif %}
                         >
                             {{ inbox_badge_count|default:0 }}
+                        </span>
+                    </a>
+
+                    <!-- Notifications in navbar -->
+                    <a href="{% url 'inbox' %}?tab=notifications"
+                    aria-label="Notifications"
+                    title="Notifications"
+                    style="display:inline-flex; align-items:center; gap:8px;">
+
+                        <svg
+                            width="23"
+                            height="23"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                            <path d="M10 21h4"/>
+                        </svg>
+
+                        <span
+                            id="navbar-notification-count"
+                            class="count"
+                            {% if not unread_notification_count %}hidden{% endif %}
+                        >
+                            {{ unread_notification_count|default:0 }}
                         </span>
                     </a>
 
@@ -117,10 +148,20 @@
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
-<script>
-    // Initialize immediately, not inside DOMContentLoaded.
-    if (typeof io !== "undefined") {
 
+<script>
+(function () {
+    "use strict";
+
+    const unreadUrl = "{% url 'unread_summary' %}";
+
+    let latestRequest = 0;
+
+    // INITIALIZE SOCKET.IO ONLY ONCE
+    if (
+        typeof io !== "undefined" &&
+        !window.liveSocket
+    ) {
         window.liveSocket = io({
             path: "/socket.io/",
             transports: ["websocket", "polling"],
@@ -129,129 +170,11 @@
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000
         });
-        
-        async function refreshInboxBadge() {
-            try {
-                const response = await fetch(
-                    "{% url 'unread_summary' %}",
-                    {
-                        credentials: "same-origin",
-                        cache: "no-store"
-                    }
-                );
-
-                if (!response.ok) return;
-
-                const data = await response.json();
-
-                const badge = document.getElementById(
-                    "inbox-badge"
-                );
-
-                if (badge) {
-                    const count = data.inbox_badge_count;
-
-                    badge.textContent = count;
-                    badge.hidden = count === 0;
-                }
-
-            } catch (error) {
-                console.error(
-                    "Failed to update Inbox count:",
-                    error
-                );
-            }
-        }
-
-        window.refreshInboxBadge = refreshInboxBadge;
-
-        // Update after real-time events.
-        window.liveSocket.on(
-            "new_message",
-            refreshInboxBadge
-        );
-
-        window.liveSocket.on(
-            "contact_request_created",
-            refreshInboxBadge
-        );
-
-        window.liveSocket.on(
-            "contact_request_updated",
-            refreshInboxBadge
-        );
-
-        window.liveSocket.on(
-            "connect",
-            refreshInboxBadge
-        );
-
-        // Synchronize when returning to this browser tab.
-        document.addEventListener(
-            "visibilitychange",
-            function () {
-                if (!document.hidden) {
-                    refreshInboxBadge();
-                }
-            }
-        );
-
-
-        window.liveSocket.on("connect", function () {
-            console.log(
-                "Socket.IO connected:",
-                window.liveSocket.id
-            );
-        });
-
-        window.liveSocket.on("disconnect", function (reason) {
-            console.warn("Socket.IO disconnected:", reason);
-        });
-
-        window.liveSocket.on("connect_error", function (error) {
-            console.error(
-                "Socket.IO connection error:",
-                error.message
-            );
-        });
-
-        window.liveSocket.on("new_notification", function (data) {
-
-            const counter = document.getElementById(
-                "live-notification-count"
-            );
-
-            if (counter) {
-                const count = Number(data.unread_count || 0);
-
-                counter.textContent = count;
-                counter.hidden = count === 0;
-            }
-
-            const toast = document.createElement("div");
-            toast.className = "realtime-toast";
-            toast.textContent = data.message;
-            toast.setAttribute("role", "status");
-
-            document.body.appendChild(toast);
-
-            setTimeout(function () {
-                toast.remove();
-            }, 5000);
-        });
-
-    } else {
-        console.error("Socket.IO client library not loaded.");
     }
-</script>
 
-<script>
-(function () {
-    const unreadUrl = "{% url 'unread_summary' %}";
-
-    let latestRequest = 0;
-
+    // UPDATE INBOX AND NOTIFICATION COUNTS
     async function refreshInboxBadge() {
+
         const requestNumber = ++latestRequest;
 
         try {
@@ -261,75 +184,171 @@
                 cache: "no-store"
             });
 
-            if (!response.ok) return;
+            if (!response.ok) {
+                console.error(
+                    "Unread summary failed:",
+                    response.status
+                );
+                return;
+            }
 
             const data = await response.json();
 
-            // Ignore an older response arriving late.
-            if (requestNumber !== latestRequest) return;
+            if (requestNumber !== latestRequest) {
+                return;
+            }
 
-            const badge = document.getElementById(
+            // INBOX COUNTER
+            const inboxBadge = document.getElementById(
                 "inbox-badge"
             );
 
-            if (!badge) return;
-
-            const count = Number(
-                data.inbox_badge_count || 0
+            const inboxCount = Number(
+                data.inbox_badge_count ?? 0
             );
 
-            badge.textContent =
-                count > 99 ? "99+" : String(count);
+            if (inboxBadge) {
+                inboxBadge.textContent =
+                    inboxCount > 99
+                        ? "99+"
+                        : String(inboxCount);
 
-            badge.hidden = count === 0;
+                inboxBadge.hidden = inboxCount === 0;
+            }
+
+            // NOTIFICATION COUNTER
+            const notificationBadge =
+                document.getElementById(
+                    "navbar-notification-count"
+                );
+
+            const notificationCount = Number(
+                data.unread_notifications ?? 0
+            );
+
+            if (notificationBadge) {
+                notificationBadge.textContent =
+                    notificationCount > 99
+                        ? "99+"
+                        : String(notificationCount);
+
+                notificationBadge.hidden =
+                    notificationCount === 0;
+            }
 
             console.log(
-                "Navbar Inbox count updated:",
-                count
+                "Unread counts updated:",
+                {
+                    inbox: inboxCount,
+                    notifications: notificationCount
+                }
             );
 
         } catch (error) {
             console.error(
-                "Inbox badge update failed:",
+                "Unread count update failed:",
                 error
             );
         }
     }
 
-    // Make it available to the chat page.
+    // AVAILABLE TO OTHER PAGES
     window.refreshInboxBadge = refreshInboxBadge;
 
+    // NOTIFICATION TOAST
+    function showNotificationToast(data) {
+
+        if (!data || !data.message) {
+            return;
+        }
+
+        const toast = document.createElement("div");
+
+        toast.className = "realtime-toast";
+        toast.textContent = data.message;
+        toast.setAttribute("role", "status");
+
+        document.body.appendChild(toast);
+
+        setTimeout(function () {
+            toast.remove();
+        }, 5000);
+    }
+
+    // SOCKET.IO EVENTS
     const socket = window.liveSocket;
 
     if (socket) {
 
-        // New incoming message
-        socket.on("new_message", refreshInboxBadge);
+        socket.on("connect", function () {
 
-        // New contact request
+            console.log(
+                "Socket.IO connected:",
+                socket.id
+            );
+
+            refreshInboxBadge();
+        });
+
+        socket.on("disconnect", function (reason) {
+            console.warn(
+                "Socket.IO disconnected:",
+                reason
+            );
+        });
+
+        socket.on("connect_error", function (error) {
+            console.error(
+                "Socket.IO connection error:",
+                error.message
+            );
+        });
+
+        // NEW MESSAGE
+        socket.on(
+            "new_message",
+            refreshInboxBadge
+        );
+
+        // CONTACT REQUEST CREATED
         socket.on(
             "contact_request_created",
             refreshInboxBadge
         );
 
-        // Request approved or rejected
+        // CONTACT REQUEST UPDATED
         socket.on(
             "contact_request_updated",
             refreshInboxBadge
         );
 
-        // Reconnect: retrieve latest count
-        socket.on("connect", refreshInboxBadge);
+        // NEW NOTIFICATION
+        socket.on("new_notification", function (data) {
 
+            refreshInboxBadge();
+
+            showNotificationToast(data);
+        });
+
+        // ALL NOTIFICATIONS MARKED AS READ
+        socket.on(
+            "notifications_read",
+            refreshInboxBadge
+        );
+
+    } else {
+        console.error(
+            "Socket.IO client library not loaded."
+        );
     }
 
-    // Messages marked as read in another component
+    // REFRESH AFTER MESSAGES ARE READ
     window.addEventListener(
         "findloop:messages-read",
         refreshInboxBadge
     );
 
-    // Returning to the website
+    // REFRESH WHEN BROWSER TAB BECOMES ACTIVE
     document.addEventListener(
         "visibilitychange",
         function () {
@@ -339,16 +358,18 @@
         }
     );
 
+    // REFRESH WHEN WINDOW GAINS FOCUS
     window.addEventListener(
         "focus",
         refreshInboxBadge
     );
 
-    // Correct any stale count on initial page load.
+    // INITIAL COUNT
     refreshInboxBadge();
 
 })();
 </script>
+
 
 
 {% endif %}

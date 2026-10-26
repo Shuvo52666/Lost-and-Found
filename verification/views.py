@@ -183,11 +183,13 @@ def contact(request, pk):
                     )
 
                     # Save notification in database.
+                    # Save contact request notification.
                     notify(
                         post.user,
                         f'{request.user.username} sent a chat request '
                         f'for "{post.caption}".',
-                        post
+                        post,
+                        contact_request=contact_request
                     )
 
                     # ---------------------------------

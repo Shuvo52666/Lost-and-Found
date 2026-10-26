@@ -84,7 +84,11 @@ def inbox(request):
     recent_notifications = (
         Notification.objects
         .filter(user=user)
-        .select_related("post")
+        .select_related(
+            "post",
+            "post__community",
+            "contact_request"
+        )
         .order_by("-created_at")[:20]
     )
 
@@ -134,17 +138,17 @@ def inbox(request):
 
     if active_chat:
 
-        # Mark as read only when the chat is
-        # explicitly selected using ?chat=ID.
-        if chat_id:
+    # Automatically mark messages as read
+    # whenever the user is viewing this chat.
+        selected_tab = request.GET.get("tab", "chats")
+
+        if selected_tab == "chats":
 
             Message.objects.filter(
                 request=active_chat,
                 receiver=user,
                 is_read=False
-            ).update(
-                is_read=True
-            )
+            ).update(is_read=True)
 
         # Chronological message history.
         chat_messages = (
